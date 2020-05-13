@@ -39,7 +39,7 @@ func TestOpen1(t *testing.T) {
 }
 
 func TestLargePut(t *testing.T) {
-	// db, err := New("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db1, err := New("chen4", DBOpts{dataDir: "", mtSizeLimit: 0})
 	// if err != nil {
 	// 	panic(err)
 	// }
@@ -51,7 +51,7 @@ func TestLargePut(t *testing.T) {
 	// }
 	// db.Close()
 
-	db1, err := Open("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
+	//db1, err := Open("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}

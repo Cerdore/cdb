@@ -49,8 +49,8 @@ const (
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	//	mtSizeLimit = uint32(4194304)
-	mtSizeLimit = uint32(4096)
+	mtSizeLimit = uint32(4194304)
+	//mtSizeLimit = uint32(4096)
 )
 
 type DBOpts struct {

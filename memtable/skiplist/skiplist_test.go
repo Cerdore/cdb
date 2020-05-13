@@ -1,6 +1,7 @@
 package skiplist
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -106,6 +107,21 @@ func TestSkipList_Size(t *testing.T) {
 	put(list, "awww", "yeah")
 
 	assert.Equal(t, list.Size(), uint32(17))
+}
+
+func BenchmarkPut(t *testing.B) {
+	list := New(1)
+
+	for i := 0; i < t.N; i++ {
+		put(list, fmt.Sprintf("mykey%7d", i), fmt.Sprint("myvalue", i))
+	}
+
+	for i := 0; i < t.N; i++ {
+		_, byte := list.Get([]byte(fmt.Sprintf("mykey%7d", i)))
+		if byte != nil {
+			t.Log(string(byte))
+		}
+	}
 }
 
 func assertSkipListValue(t *testing.T, list *SkipList, key string, value string) {
