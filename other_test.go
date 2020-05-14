@@ -67,11 +67,11 @@ func TestLargePut(t *testing.T) {
 
 func TestTimeof(t *testing.T) {
 	//	runtime.GOMAXPROCS(4)
-	d, err := New("chen17", DBOpts{dataDir: "", mtSizeLimit: 0})
+	d, err := New("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < 500000; i++ {
+	for i := 0; i < 1000000; i++ {
 		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
 	}
 
@@ -79,11 +79,11 @@ func TestTimeof(t *testing.T) {
 }
 
 func TestRestore(t *testing.T) {
-	db1, err := Open("chen17", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db1, err := Open("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
 	}
-	for i := 0; i < 1000; i++ {
+	for i := 999900; i < 1000000; i++ {
 		ans, err := db1.Get([]byte(fmt.Sprintf("mykey%7d", i)))
 		if err != nil {
 			t.Log(err)
@@ -94,4 +94,29 @@ func TestRestore(t *testing.T) {
 	}
 
 	db1.Close()
+}
+
+func TestPutAGet(t *testing.T) {
+	db, err := Open("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		t.Log(err)
+	}
+	db.Put([]byte("kk1"), []byte("kv22"))
+
+	ans, err := db.Get([]byte("kk1"))
+	if err != nil {
+		t.Log(err)
+	}
+	if ans != nil {
+		fmt.Println(string(ans))
+	}
+
+	ans, err = db.Get([]byte(fmt.Sprintf("mykey%7d", 990000)))
+	if err != nil {
+		t.Log(err)
+	}
+	if ans != nil {
+		fmt.Println(string(ans))
+	}
+	db.Close()
 }

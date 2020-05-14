@@ -160,6 +160,7 @@ func (w *WAL) Restore(mem *memtable.MemTable) error {
 
 //TODO: old wal files need to remove
 func (w *WAL) Close() error {
+	w.logFile.Sync()
 	filename := w.logFile.Name()
 	if err := w.logFile.Close(); err != nil {
 		return fmt.Errorf("failed attempting to close WAL log file: %w", err)

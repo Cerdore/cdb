@@ -230,6 +230,8 @@ func (d *DB) Close() error {
 	// TODO:
 	// flush to memtable here
 	// ensure no future get/puts succeed
+
+	err = d.flushMemTable(filepath.Base(file.Name()), file)
 	close(d.stopWatching)
 	return d.unlock()
 }
@@ -312,6 +314,10 @@ func (d *DB) Put(key []byte, value []byte) error {
 			// Abort compaction attempt
 			d.memTable = d.compactingMemTable
 			d.walog = d.compactingWAL
+
+			if err := d.compactingWAL.Close(); err != nil {
+				return fmt.Errorf("compactingWAL closed error : %w", err)
+			}
 
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
