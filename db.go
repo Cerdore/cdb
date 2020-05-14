@@ -49,7 +49,8 @@ const (
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	mtSizeLimit = uint32(4194304)
+	//mtSizeLimit = uint32(4194304)
+	mtSizeLimit = uint32(1024 * 1024)
 	//mtSizeLimit = uint32(4096)
 )
 
@@ -300,7 +301,7 @@ func (d *DB) Put(key []byte, value []byte) error {
 
 	// compactingMemTable not being nil indicating that a compaction is already underway
 	if d.memTable.Size() > d.mtSizeLimit && d.compactingMemTable == nil {
-		fmt.Println("begin to Compact ")
+		//fmt.Println("begin to Compact ")
 		d.compactingMemTable = d.memTable
 		d.compactingWAL = d.walog
 
@@ -342,7 +343,7 @@ func (d *DB) compactionWatcher() {
 	for {
 		select {
 		case <-d.compact:
-			fmt.Println("watcher found chanel changed!!")
+			//fmt.Println("watcher found chanel changed!!")
 			if err := d.doCompaction(); err != nil {
 				log.Errorf("error performing compaction: %v", err)
 			}

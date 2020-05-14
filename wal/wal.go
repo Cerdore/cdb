@@ -1,6 +1,7 @@
 package wal
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -22,6 +23,7 @@ type WAL struct {
 	codec   storage.Codec
 	logFile *os.File
 	size    uint32
+	writer  *bufio.Writer
 }
 
 const (
@@ -31,7 +33,7 @@ const (
 
 // New creates a new writeahead log and returns a reference to it
 func New(file *os.File) *WAL {
-	return &WAL{codec: storage.Codec{}, logFile: file, size: 0}
+	return &WAL{codec: storage.Codec{}, logFile: file, size: 0, writer: bufio.NewWriter(file)}
 }
 
 func CreateFile(dbName string, dataDir string) (*os.File, error) {
@@ -69,28 +71,52 @@ func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
 
 // Write writes the record to the writeahead log
 func (w *WAL) Write(record *storage.Record) error {
+	//t1 := time.Now()
 	data, err := w.codec.Encode(record)
 	if err != nil {
 		return fmt.Errorf("failed encoding data to write to log: %w", err)
 	}
+	//el1 := time.Since(t1)
+	//t2 := time.Now()
 
-	if n, err := w.logFile.Write(data); n != len(data) {
+	// if n, err := w.logFile.Write(data); n != len(data) {
+	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
+	// 		n, len(data), err)
+	// } else if err != nil {
+	// 	return fmt.Errorf("failed to write data to log: %w", err)
+	// }
+
+	if n, err := w.writer.Write(data); n != len(data) {
 		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
 			n, len(data), err)
 	} else if err != nil {
 		return fmt.Errorf("failed to write data to log: %w", err)
 	}
 
+	//el2 := time.Since(t2)
+	//t3 := time.Now()
+
 	// update current size of WAL
 	w.size += uint32(len(data))
 
+	if err := w.writer.Flush(); err != nil {
+		return fmt.Errorf("failed to flush into log: %w", err)
+	}
+
+	// if err := w.logFile.Sync(); err != nil {
+	// 	return fmt.Errorf("failed syncing data to disk: %w", err)
+	// }
+
+	//el3 := time.Since(t3)
+	// fmt.Println(el1, "----", el2, "----", el3)
+	return nil
+}
+func (w *WAL) Sync() error {
 	if err := w.logFile.Sync(); err != nil {
 		return fmt.Errorf("failed syncing data to disk: %w", err)
 	}
-
 	return nil
 }
-
 func (w *WAL) Size() uint32 {
 	return w.size
 }
@@ -132,17 +158,18 @@ func (w *WAL) Restore(mem *memtable.MemTable) error {
 	return nil
 }
 
+//TODO: old wal files need to remove
 func (w *WAL) Close() error {
+	filename := w.logFile.Name()
 	if err := w.logFile.Close(); err != nil {
 		return fmt.Errorf("failed attempting to close WAL log file: %w", err)
 	}
 
 	// TODO: if this fails, the log file is closed and future calls to Close will error
 	// on the os.File#Close call. Could leave an old WAL around
-	if err := os.Remove(w.logFile.Name()); err != nil {
+	if err := os.Remove(filename); err != nil {
 		w.logFile.Close()
 		return fmt.Errorf("failed attempting to remove WAL file: %w", err)
 	}
-
 	return nil
 }

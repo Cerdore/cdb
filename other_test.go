@@ -2,6 +2,7 @@ package cdb
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 )
 
@@ -39,6 +40,7 @@ func TestOpen1(t *testing.T) {
 }
 
 func TestLargePut(t *testing.T) {
+	runtime.GOMAXPROCS(4)
 	db1, err := New("chen4", DBOpts{dataDir: "", mtSizeLimit: 0})
 	// if err != nil {
 	// 	panic(err)
@@ -55,10 +57,41 @@ func TestLargePut(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		db1.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
 	}
 
 	db1.Close()
 	//os.RemoveAll(path.Join(datadir, "chen3"))
+}
+
+func TestTimeof(t *testing.T) {
+	//	runtime.GOMAXPROCS(4)
+	d, err := New("chen17", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < 500000; i++ {
+		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	}
+
+	d.Close()
+}
+
+func TestRestore(t *testing.T) {
+	db1, err := Open("chen17", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		t.Log(err)
+	}
+	for i := 0; i < 1000; i++ {
+		ans, err := db1.Get([]byte(fmt.Sprintf("mykey%7d", i)))
+		if err != nil {
+			t.Log(err)
+		}
+		if ans != nil {
+			fmt.Println(string(ans))
+		}
+	}
+
+	db1.Close()
 }
