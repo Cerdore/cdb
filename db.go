@@ -49,8 +49,8 @@ const (
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	//mtSizeLimit = uint32(4194304)
-	mtSizeLimit = uint32(1024 * 1024)
+	mtSizeLimit = uint32(4194304)
+	//mtSizeLimit = uint32(1024 * 1024)
 	//mtSizeLimit = uint32(4096)
 )
 
@@ -231,7 +231,7 @@ func (d *DB) Close() error {
 	// flush to memtable here
 	// ensure no future get/puts succeed
 
-	err = d.flushMemTable(filepath.Base(file.Name()), file)
+	//err = d.flushMemTable(filepath.Base(file.Name()), file)
 	close(d.stopWatching)
 	return d.unlock()
 }

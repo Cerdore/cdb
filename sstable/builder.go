@@ -33,7 +33,7 @@ const (
 
 func CreateFile(dbName string, dataDir string) (*os.File, error) {
 	// TODO: needs a nonce to prevent potential collusions of really quickly created sstable files
-	return util.CreateFile(fmt.Sprintf("%s_%s_%d", sstPrefix, dbName, time.Now().UnixNano()/1_000_000_000),
+	return util.CreateFile(fmt.Sprintf("%s_%s_%d", sstPrefix, dbName, time.Now().UnixNano()/1_000_000),
 		dbName, dataDir)
 }
 

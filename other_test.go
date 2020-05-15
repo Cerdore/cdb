@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"runtime"
 	"testing"
+	"time"
 )
 
 func TestOpen1(t *testing.T) {
@@ -67,7 +68,7 @@ func TestLargePut(t *testing.T) {
 
 func TestTimeof(t *testing.T) {
 	//	runtime.GOMAXPROCS(4)
-	d, err := New("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
+	d, err := New("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +80,7 @@ func TestTimeof(t *testing.T) {
 }
 
 func TestRestore(t *testing.T) {
-	db1, err := Open("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db1, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
 	}
@@ -97,11 +98,11 @@ func TestRestore(t *testing.T) {
 }
 
 func TestPutAGet(t *testing.T) {
-	db, err := Open("chen19", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
 	}
-	db.Put([]byte("kk1"), []byte("kv22"))
+	db.Put([]byte("kk1"), []byte("kv23"))
 
 	ans, err := db.Get([]byte("kk1"))
 	if err != nil {
@@ -116,7 +117,37 @@ func TestPutAGet(t *testing.T) {
 		t.Log(err)
 	}
 	if ans != nil {
-		fmt.Println(string(ans))
+		fmt.Println(fmt.Sprintf("mykey%7d", 990000), string(ans))
 	}
 	db.Close()
+}
+
+func TestOpenAndDel(t *testing.T) {
+	db, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		t.Log(err)
+	}
+	//	db.Put([]byte("kk1"), []byte("kv23"))
+	db.Delete([]byte("kk1"))
+	ans, err := db.Get([]byte("kk1"))
+	if err != nil {
+		t.Log(err)
+	}
+	if ans != nil {
+		fmt.Println(string(ans))
+	} else {
+		fmt.Println("not found")
+	}
+	db.Close()
+}
+
+func TestTimeUnix(t *testing.T) {
+	fmt.Println(time.Now().UnixNano() / 1000000000)
+
+	fmt.Println(time.Now().UnixNano() / 1000000)
+
+	fmt.Println(time.Now().UnixNano() / 1000)
+
+	fmt.Println(time.Now().UnixNano())
+
 }
