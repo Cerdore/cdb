@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"cdb/bloom"
 	"cdb/memtable/interfaces"
 	"cdb/storage"
 	"cdb/util"
@@ -58,15 +59,19 @@ func newBuilder(name string, iter interfaces.InternalIterator, level int, writer
 	record
 	...
 	record
+	[filter block]
 	index_block
 
 	footer
 */
-func (s *Builder) WriteTable() (*Metadata, error) {
-	recWritten := 0
+func (s *Builder) WriteTable(memNum uint32) (*Metadata, error) {
+	recWritten := 0 //已写数据条数
 	bytesWritten := uint32(0)
 
-	indices := make(map[string]storage.RecordPointer)
+	bloom := bloom.NewBloom(int(memNum))
+
+	indices := make(map[string]storage.RecordPointer) //rec的索引信息
+
 	var order []string
 
 	var firstKey []byte
@@ -81,6 +86,8 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		if firstKey == nil {
 			firstKey = rec.Key
 		}
+
+		//		bloom.Insert(rec.Key)
 
 		bytes, err := s.codec.Encode(rec)
 		if err != nil {
@@ -104,6 +111,14 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		bytesWritten += uint32(len(bytes))
 	}
 	fmt.Println(recWritten, "end loop")
+
+	// bloom Here
+	bloomStart := bytesWritten
+	bLen := len(bloom.Bytes())
+	if err := write(s.writer, bloom.Bytes()); err != nil {
+		return nil, fmt.Errorf("failed attempting to write to level 0 sstable: %w", err)
+	}
+	bytesWritten += uint32(bLen)
 
 	indexStart := bytesWritten
 	firstLen := 0
@@ -131,6 +146,8 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		IndexStartByte: indexStart,
 		Length:         uint32(firstLen),
 		IndexEntries:   uint32(len(indices)),
+		BloomStartByte: uint32(bloomStart),
+		BLength:        uint32(bLen),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not encode footer pointer record: %w", err)
@@ -149,5 +166,6 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		Filename: s.name,
 		StartKey: firstKey,
 		EndKey:   lastKey,
+		Bits:     bloom.Bytes(),
 	}, nil
 }

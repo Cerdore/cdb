@@ -3,6 +3,7 @@ package cdb
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -358,13 +359,13 @@ func (d *DB) compactionWatcher() {
 	}
 }
 
-func (d *DB) flushMemTable(tableName string, writer *os.File) error {
+func (d *DB) flushMemTable(tableName string, writer io.Writer, memNum uint32) error {
 	iter := d.compactingMemTable.InternalIterator()
 
 	fmt.Println(d.compactingMemTable.Num())
 
 	builder := sstable.NewBuilder(tableName, iter, 0, writer)
-	metadata, err := builder.WriteTable()
+	metadata, err := builder.WriteTable(memNum)
 	if err != nil {
 		return fmt.Errorf("could not write memtable to level 0 sstable: %w", err)
 	}
@@ -380,7 +381,7 @@ func (d *DB) doCompaction() error {
 		}
 		defer file.Close()
 
-		err = d.flushMemTable(filepath.Base(file.Name()), file)
+		err = d.flushMemTable(filepath.Base(file.Name()), file, d.compactingMemTable.Num())
 
 		if err == nil {
 			if err = file.Sync(); err != nil {
