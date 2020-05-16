@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"cdb/memtable/interfaces"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,6 +32,7 @@ type SkipList struct {
 	head   *Node
 	levels int
 	size   uint32
+	num    uint32
 }
 
 var _ interfaces.InMemoryStore = &SkipList{}
@@ -82,6 +84,7 @@ func (s *SkipList) Put(key []byte, value []byte) {
 	} else {
 		s.insert(key, value)
 		s.size += uint32(len(key) + len(value))
+		s.num++
 	}
 
 }
@@ -257,4 +260,8 @@ func (s *SkipList) InternalIterator() interfaces.InternalIterator {
 
 func (s *SkipList) Size() uint32 {
 	return s.size
+}
+
+func (s *SkipList) Num() uint32 {
+	return s.num
 }

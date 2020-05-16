@@ -20,4 +20,6 @@ type InMemoryStore interface {
 
 	// Size returns the approximate size of the underlying structure
 	Size() uint32
+
+	Num() uint32
 }

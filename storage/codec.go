@@ -213,6 +213,14 @@ func (c *Codec) EncodeFooter(footer *Footer) ([]byte, error) {
 		return nil, fmt.Errorf("failed to encode index entries for footer: %w", err)
 	}
 
+	if err := binary.Write(&buf, binary.BigEndian, footer.BloomStartByte); err != nil {
+		return nil, fmt.Errorf("failed to encode index BloomStartByte for footer: %w", err)
+	}
+
+	if err := binary.Write(&buf, binary.BigEndian, footer.BLength); err != nil {
+		return nil, fmt.Errorf("failed to encode index BLength for footer: %w", err)
+	}
+
 	return buf.Bytes(), nil
 }
 
@@ -232,9 +240,20 @@ func (c *Codec) DecodeFooter(reader io.Reader) (*Footer, error) {
 		return nil, fmt.Errorf("failed to decode index entries for footer: %w", err)
 	}
 
+	var BloomStart uint32
+	if err := binary.Read(reader, binary.BigEndian, &BloomStart); err != nil {
+		return nil, fmt.Errorf("failed to decode index BloomStart for footer: %w", err)
+	}
+
+	var BLenth uint32
+	if err := binary.Read(reader, binary.BigEndian, &BLenth); err != nil {
+		return nil, fmt.Errorf("failed to decode index BLenth for footer: %w", err)
+	}
 	return &Footer{
 		IndexStartByte: startByte,
 		Length:         length,
 		IndexEntries:   entries,
+		BloomStartByte: BloomStart,
+		BLength:        BLenth,
 	}, nil
 }

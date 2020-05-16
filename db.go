@@ -314,11 +314,9 @@ func (d *DB) Put(key []byte, value []byte) error {
 			// Abort compaction attempt
 			d.memTable = d.compactingMemTable
 			d.walog = d.compactingWAL
-
-			if err := d.compactingWAL.Close(); err != nil {
-				return fmt.Errorf("compactingWAL closed error : %w", err)
-			}
-
+			// if err := d.compactingWAL.Close(); err != nil {
+			// 	return fmt.Errorf("compactingWAL closed error : %w", err)
+			// }
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
 
@@ -359,11 +357,11 @@ func (d *DB) compactionWatcher() {
 	}
 }
 
-func (d *DB) flushMemTable(tableName string, writer io.Writer) error {
+func (d *DB) flushMemTable(tableName string, writer io.Writer, memNum uint32) error {
 	iter := d.compactingMemTable.InternalIterator()
 
 	builder := sstable.NewBuilder(tableName, iter, 0, writer)
-	metadata, err := builder.WriteTable()
+	metadata, err := builder.WriteTable(memNum)
 	if err != nil {
 		return fmt.Errorf("could not write memtable to level 0 sstable: %w", err)
 	}
@@ -379,7 +377,7 @@ func (d *DB) doCompaction() error {
 		}
 		defer file.Close()
 
-		err = d.flushMemTable(filepath.Base(file.Name()), file)
+		err = d.flushMemTable(filepath.Base(file.Name()), file, d.compactingMemTable.Num())
 
 		if err == nil {
 			if err = file.Sync(); err != nil {

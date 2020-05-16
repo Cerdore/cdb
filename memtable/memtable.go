@@ -39,3 +39,7 @@ func (m *MemTable) InternalIterator() interfaces.InternalIterator {
 func (m *MemTable) Size() uint32 {
 	return m.memStore.Size()
 }
+
+func (m *MemTable) Num() uint32 {
+	return m.memStore.Num()
+}

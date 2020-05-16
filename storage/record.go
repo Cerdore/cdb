@@ -7,6 +7,14 @@ const (
 	RecordDelete                   // indicates that this record was a delete
 )
 
+/*
+	|Record|
+	|......|
+	|Record|
+	|index block|
+	|footer|
+
+*/
 // Record is an in-memory representation of an update on the datastore
 type Record struct {
 	Key   []byte
@@ -27,6 +35,8 @@ type Footer struct {
 	IndexStartByte uint32
 	Length         uint32 //第一个索引的len
 	IndexEntries   uint32 //索引数目
+	BloomStartByte uint32
+	BLength        uint32
 }
 
 func NewRecord(key []byte, value []byte, delete bool) *Record {
