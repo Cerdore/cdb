@@ -1,8 +1,8 @@
 package sstable
 
 import (
+	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"time"
 
@@ -14,10 +14,11 @@ import (
 // Builder is a structure that can take an iterator from a memtable data structure and use
 // that to create an SSTable
 type Builder struct {
-	name           string
-	iter           interfaces.InternalIterator
-	codec          *storage.Codec
-	writer         io.Writer
+	name  string
+	iter  interfaces.InternalIterator
+	codec *storage.Codec
+	//writer         io.Writer
+	writer         *bufio.Writer
 	indexPerRecord int
 	level          int
 }
@@ -37,16 +38,16 @@ func CreateFile(dbName string, dataDir string) (*os.File, error) {
 		dbName, dataDir)
 }
 
-func NewBuilder(name string, iter interfaces.InternalIterator, level int, writer io.Writer) *Builder {
+func NewBuilder(name string, iter interfaces.InternalIterator, level int, writer *os.File) *Builder {
 	return newBuilder(name, iter, level, writer, indexCount)
 }
 
-func newBuilder(name string, iter interfaces.InternalIterator, level int, writer io.Writer, indexPerRecord int) *Builder {
+func newBuilder(name string, iter interfaces.InternalIterator, level int, writer *os.File, indexPerRecord int) *Builder {
 	return &Builder{
 		name:           name,
 		iter:           iter,
 		codec:          &storage.Codec{},
-		writer:         writer,
+		writer:         bufio.NewWriter(writer),
 		indexPerRecord: indexPerRecord,
 		level:          level}
 }
@@ -72,7 +73,10 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 	var lastKey []byte
 
 	// Write actual key-values to disk
+	fmt.Println("action loop")
+	//死在这里了 考虑提前获得所有rec
 	for ; s.iter.HasNext(); recWritten++ {
+		//fmt.Println(recWritten)
 		rec := s.iter.Next()
 		if firstKey == nil {
 			firstKey = rec.Key
@@ -80,10 +84,13 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 
 		bytes, err := s.codec.Encode(rec)
 		if err != nil {
+			fmt.Println("error1 ")
 			return nil, fmt.Errorf("could not encode record: %w", err)
 		}
 
-		if err = write(s.writer, bytes); err != nil {
+		//if err = write(s.writer, bytes); err != nil {
+		if n, err := s.writer.Write(bytes); err != nil || n != len(bytes) {
+			fmt.Println("error2 ")
 			return nil, fmt.Errorf("failed attempting to write to level 0 sstable: %w", err)
 		}
 
@@ -96,6 +103,7 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		lastKey = rec.Key
 		bytesWritten += uint32(len(bytes))
 	}
+	fmt.Println(recWritten, "end loop")
 
 	indexStart := bytesWritten
 	firstLen := 0
@@ -107,7 +115,8 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 			return nil, fmt.Errorf("could not encode index pointer record: %w", err)
 		}
 
-		if err = write(s.writer, bytes); err != nil {
+		//if err = write(s.writer, bytes); err != nil {
+		if n, err := s.writer.Write(bytes); err != nil || n != len(bytes) {
 			return nil, fmt.Errorf("failed attempting to write to level 0 sstable: %w", err)
 		}
 
@@ -127,10 +136,14 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		return nil, fmt.Errorf("could not encode footer pointer record: %w", err)
 	}
 
-	if err = write(s.writer, bytes); err != nil {
+	//if err = write(s.writer, bytes); err != nil {
+	if n, err := s.writer.Write(bytes); err != nil || n != len(bytes) {
 		return nil, fmt.Errorf("failed attempting to write to level 0 sstable: %w", err)
 	}
 
+	if err := s.writer.Flush(); err != nil {
+		return nil, fmt.Errorf("failed to flush into disk: %w", err)
+	}
 	return &Metadata{
 		Level:    uint8(s.level),
 		Filename: s.name,

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"cdb/storage"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -52,7 +53,7 @@ func (m *Merger) Merge() ([]*Metadata, error) {
 	var files []io.ReadSeeker
 	for _, me := range m.srcMetadata {
 		handle, err := os.Open(path.Join(m.dataDir, m.dbName, me.Filename))
-		defer handle.Close()
+		//defer handle.Close()
 		if err != nil {
 			return nil, fmt.Errorf("could not open file %s for compaction: %w", me.Filename, err)
 		}

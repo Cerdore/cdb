@@ -151,3 +151,29 @@ func TestTimeUnix(t *testing.T) {
 	fmt.Println(time.Now().UnixNano())
 
 }
+
+func TestDataExists(t *testing.T) {
+	db, err := New("chen37", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 1; i < 200000; i++ {
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	}
+
+	db.Close()
+
+}
+
+func TestDataLaExists(t *testing.T) {
+	db, err := New("chen41", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 1; i < 1000000; i++ {
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	}
+
+	db.Close()
+
+}

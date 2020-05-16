@@ -3,7 +3,6 @@ package cdb
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -49,8 +48,8 @@ const (
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	mtSizeLimit = uint32(4194304)
-	//mtSizeLimit = uint32(1024 * 1024)
+	//mtSizeLimit = uint32(4194304)
+	mtSizeLimit = uint32(2 * 1024 * 1024)
 	//mtSizeLimit = uint32(4096)
 )
 
@@ -315,9 +314,9 @@ func (d *DB) Put(key []byte, value []byte) error {
 			d.memTable = d.compactingMemTable
 			d.walog = d.compactingWAL
 
-			if err := d.compactingWAL.Close(); err != nil {
-				return fmt.Errorf("compactingWAL closed error : %w", err)
-			}
+			// if err := d.compactingWAL.Close(); err != nil {
+			// 	return fmt.Errorf("compactingWAL closed error : %w", err)
+			// }
 
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
@@ -359,8 +358,10 @@ func (d *DB) compactionWatcher() {
 	}
 }
 
-func (d *DB) flushMemTable(tableName string, writer io.Writer) error {
+func (d *DB) flushMemTable(tableName string, writer *os.File) error {
 	iter := d.compactingMemTable.InternalIterator()
+
+	fmt.Println(d.compactingMemTable.Num())
 
 	builder := sstable.NewBuilder(tableName, iter, 0, writer)
 	metadata, err := builder.WriteTable()
@@ -395,6 +396,8 @@ func (d *DB) doCompaction() error {
 
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
+		} else {
+			fmt.Println("Closed error %w: ", err)
 		}
 	}
 
