@@ -79,35 +79,36 @@ func (w *WAL) Write(record *storage.Record) error {
 	//el1 := time.Since(t1)
 	//t2 := time.Now()
 
-	// if n, err := w.logFile.Write(data); n != len(data) {
-	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
-	// 		n, len(data), err)
-	// } else if err != nil {
-	// 	return fmt.Errorf("failed to write data to log: %w", err)
-	// }
-
-	if n, err := w.writer.Write(data); n != len(data) {
+	if n, err := w.logFile.Write(data); n != len(data) {
 		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
 			n, len(data), err)
 	} else if err != nil {
 		return fmt.Errorf("failed to write data to log: %w", err)
 	}
 
+	// if n, err := w.writer.Write(data); n != len(data) {
+	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
+	// 		n, len(data), err)
+	// } else if err != nil {
+	// 	return fmt.Errorf("failed to write data to log: %w", err)
+	// }
+
 	//el2 := time.Since(t2)
-	//t3 := time.Now()
+	//	t3 := time.Now()
 
 	// update current size of WAL
 	w.size += uint32(len(data))
 
-	if err := w.writer.Flush(); err != nil {
-		return fmt.Errorf("failed to flush into log: %w", err)
-	}
+	// if err := w.writer.Flush(); err != nil {
+	// 	return fmt.Errorf("failed to flush into log: %w", err)
+	// }
 
 	// if err := w.logFile.Sync(); err != nil {
 	// 	return fmt.Errorf("failed syncing data to disk: %w", err)
 	// }
 
 	//el3 := time.Since(t3)
+	//fmt.Println(el3)
 	// fmt.Println(el1, "----", el2, "----", el3)
 	return nil
 }

@@ -151,3 +151,26 @@ func TestTimeUnix(t *testing.T) {
 	fmt.Println(time.Now().UnixNano())
 
 }
+
+func TestDataPut(t *testing.T) {
+	d, err := New("chen49", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < 1000000; i++ {
+		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	}
+	d.Close()
+}
+
+func TestDataPut1(t *testing.T) {
+	d, err := Open("chen49", DBOpts{dataDir: "", mtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	// for i := 0; i < 1000000; i++ {
+	// 	d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	// }
+	d.Put([]byte("kk1"), []byte("kkv"))
+	d.Close()
+}

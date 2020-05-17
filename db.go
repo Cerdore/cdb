@@ -41,6 +41,7 @@ type DB struct {
 	compact            chan bool
 	stopWatching       chan bool
 	mtSizeLimit        uint32
+	wg                 sync.WaitGroup
 }
 
 // TODO: allow configuration via options provided to constructor
@@ -192,9 +193,9 @@ func Open(name string, opts DBOpts) (*DB, error) {
 		stopWatching: make(chan bool),
 		mtSizeLimit:  opts.mtSizeLimit,
 	}
-
+	db.wg.Add(1)
 	go db.compactionWatcher()
-
+	//go db.doCompaction()
 	return db, nil
 }
 
@@ -232,7 +233,11 @@ func (d *DB) Close() error {
 	// ensure no future get/puts succeed
 
 	//err = d.flushMemTable(filepath.Base(file.Name()), file)
+	log.Info("begin to close this db")
+
 	close(d.stopWatching)
+	d.wg.Wait()
+	log.Info("Already closed this db")
 	return d.unlock()
 }
 
@@ -315,9 +320,9 @@ func (d *DB) Put(key []byte, value []byte) error {
 			d.memTable = d.compactingMemTable
 			d.walog = d.compactingWAL
 
-			if err := d.compactingWAL.Close(); err != nil {
-				return fmt.Errorf("compactingWAL closed error : %w", err)
-			}
+			// if err := d.compactingWAL.Close(); err != nil {
+			// 	return fmt.Errorf("compactingWAL closed error : %w", err)
+			// }
 
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
@@ -346,10 +351,12 @@ func (d *DB) Delete(key []byte) error {
 }
 
 func (d *DB) compactionWatcher() {
+	defer d.wg.Done()
 	for {
 		select {
 		case <-d.compact:
 			//fmt.Println("watcher found chanel changed!!")
+			d.wg.Add(1)
 			if err := d.doCompaction(); err != nil {
 				log.Errorf("error performing compaction: %v", err)
 			}
@@ -372,13 +379,13 @@ func (d *DB) flushMemTable(tableName string, writer io.Writer) error {
 }
 
 func (d *DB) doCompaction() error {
+	defer d.wg.Done()
 	if d.compactingMemTable != nil {
 		file, err := sstable.CreateFile(d.name, d.dataDir)
 		if err != nil {
 			return fmt.Errorf("failed attempt to create new sstable file: %w", err)
 		}
 		defer file.Close()
-
 		err = d.flushMemTable(filepath.Base(file.Name()), file)
 
 		if err == nil {

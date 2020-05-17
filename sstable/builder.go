@@ -72,8 +72,13 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 	var lastKey []byte
 
 	// Write actual key-values to disk
+	fmt.Println("begin builder rec loop")
 	for ; s.iter.HasNext(); recWritten++ {
 		rec := s.iter.Next()
+		if rec == nil {
+			fmt.Println("error in loop because iter")
+			break
+		}
 		if firstKey == nil {
 			firstKey = rec.Key
 		}
@@ -96,6 +101,8 @@ func (s *Builder) WriteTable() (*Metadata, error) {
 		lastKey = rec.Key
 		bytesWritten += uint32(len(bytes))
 	}
+
+	fmt.Println("end builder rec loop")
 
 	indexStart := bytesWritten
 	firstLen := 0
