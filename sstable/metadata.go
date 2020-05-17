@@ -2,7 +2,6 @@ package sstable
 
 import (
 	"bytes"
-	"cdb/bloom"
 )
 
 type Metadata struct {
@@ -15,11 +14,11 @@ type Metadata struct {
 
 // ContainsKey returns true if the metadata key range contains the specified key
 func (m *Metadata) ContainsKey(key []byte) bool {
-	bloom := bloom.RecoverBloom(m.Bits)
+	// bloom := bloom.RecoverBloom(m.Bits)
 
-	if !bloom.Check(key) {
-		return false
-	}
+	// if !bloom.Check(key) {
+	// 	return false
+	// }
 
 	// startKey <= key <= endKey
 	return bytes.Compare(m.StartKey, key) <= 0 && bytes.Compare(key, m.EndKey) <= 0

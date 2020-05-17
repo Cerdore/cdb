@@ -2,6 +2,7 @@ package sstable
 
 import (
 	"bytes"
+	"cdb/bloom"
 	"fmt"
 	"io"
 	"os"
@@ -77,6 +78,8 @@ func (m *Merger) Merge() ([]*Metadata, error) {
 		}
 
 		stopByte[i] = footer.IndexStartByte
+		// bloomInx[i] = footer.BloomStartByte
+		// bLen[i] = footer.BLength
 
 		_, err = handle.Seek(0, io.SeekStart)
 		if err != nil {
@@ -125,6 +128,7 @@ func (m *Merger) mergeToFile(files []io.ReadSeeker, current []*storage.Record, s
 	recWritten := 0
 
 	indices := make(map[string]*storage.RecordPointer)
+	resultRec := make([][]byte, 50000)
 	var order []string
 
 	var startKey []byte
@@ -176,6 +180,7 @@ func (m *Merger) mergeToFile(files []io.ReadSeeker, current []*storage.Record, s
 			startKey = currRecord.Key
 		}
 
+		resultRec = append(resultRec, currRecord.Key)
 		// Write out current next value to be written
 		data, err := m.codec.Encode(currRecord)
 		if err != nil {
@@ -224,11 +229,17 @@ func (m *Merger) mergeToFile(files []io.ReadSeeker, current []*storage.Record, s
 		}
 	}
 
+	bloom := bloom.NewBloom(recWritten)
+	for _, v := range resultRec {
+		bloom.Insert(v)
+	}
+
 	newMeta := Metadata{
 		Level:    uint8(m.nextLevel),
 		Filename: filepath.Base(out.Name()),
 		StartKey: startKey,
 		EndKey:   endKey,
+		Bits:     bloom.Bytes(),
 	}
 
 	return &newMeta, shouldStop(current), nil

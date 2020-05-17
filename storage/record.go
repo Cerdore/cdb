@@ -35,8 +35,8 @@ type Footer struct {
 	IndexStartByte uint32
 	Length         uint32 //第一个索引的len
 	IndexEntries   uint32 //索引数目
-	BloomStartByte uint32
-	BLength        uint32
+	// BloomStartByte uint32
+	// BLength        uint32
 }
 
 func NewRecord(key []byte, value []byte, delete bool) *Record {

@@ -70,62 +70,59 @@ func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
 }
 
 // Write writes the record to the writeahead log
-func (w *WAL) Write(record *storage.Record) error {
+func (wlog *WAL) Write(record *storage.Record) error {
 	//t1 := time.Now()
-	data, err := w.codec.Encode(record)
+	data, err := wlog.codec.Encode(record)
 	if err != nil {
 		return fmt.Errorf("failed encoding data to write to log: %w", err)
 	}
 	//el1 := time.Since(t1)
 	//t2 := time.Now()
 
-	if n, err := w.logFile.Write(data); n != len(data) {
-		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
-			n, len(data), err)
-	} else if err != nil {
-		return fmt.Errorf("failed to write data to log: %w", err)
-	}
-
-	// if n, err := w.writer.Write(data); n != len(data) {
+	// if n, err := wlog.logFile.Write(data); n != len(data) {
 	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
 	// 		n, len(data), err)
 	// } else if err != nil {
 	// 	return fmt.Errorf("failed to write data to log: %w", err)
 	// }
 
+	if n, err := wlog.writer.Write(data); n != len(data) {
+		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
+			n, len(data), err)
+	} else if err != nil {
+		return fmt.Errorf("failed to write data to log: %w", err)
+	}
+
 	//el2 := time.Since(t2)
 	//	t3 := time.Now()
 
 	// update current size of WAL
-	w.size += uint32(len(data))
+	wlog.size += uint32(len(data))
 
-	// if err := w.writer.Flush(); err != nil {
-	// 	return fmt.Errorf("failed to flush into log: %w", err)
-	// }
+	if err := wlog.writer.Flush(); err != nil {
+		return fmt.Errorf("failed to flush into log: %w", err)
+	}
 
-	// if err := w.logFile.Sync(); err != nil {
+	// if err := wlog.logFile.Sync(); err != nil {
 	// 	return fmt.Errorf("failed syncing data to disk: %w", err)
 	// }
 
-	//el3 := time.Since(t3)
-	//fmt.Println(el3)
-	// fmt.Println(el1, "----", el2, "----", el3)
 	return nil
 }
-func (w *WAL) Sync() error {
-	if err := w.logFile.Sync(); err != nil {
+func (wlog *WAL) Sync() error {
+	if err := wlog.logFile.Sync(); err != nil {
 		return fmt.Errorf("failed syncing data to disk: %w", err)
 	}
 	return nil
 }
-func (w *WAL) Size() uint32 {
-	return w.size
+func (wlog *WAL) Size() uint32 {
+	return wlog.size
 }
 
-func (w *WAL) Restore(mem *memtable.MemTable) error {
+func (wlog *WAL) Restore(mem *memtable.MemTable) error {
 	for {
 		data := make([]byte, uint32size)
-		if n, err := w.logFile.Read(data); err == io.EOF {
+		if n, err := wlog.logFile.Read(data); err == io.EOF {
 			break
 		} else if n != len(data) {
 			return fmt.Errorf("failed to read expected amount of data from WAL."+
@@ -137,14 +134,14 @@ func (w *WAL) Restore(mem *memtable.MemTable) error {
 		rLen := binary.BigEndian.Uint32(data)
 
 		recBytes := make([]byte, rLen)
-		if n, err := w.logFile.Read(recBytes); uint32(n) != rLen {
+		if n, err := wlog.logFile.Read(recBytes); uint32(n) != rLen {
 			return fmt.Errorf("failed to read expected amount of record data from WAL."+
 				" read=%d, expected=%d", n, rLen)
 		} else if err != nil {
 			return fmt.Errorf("failed to read record: %w", err)
 		}
 
-		record, err := w.codec.Decode(recBytes)
+		record, err := wlog.codec.Decode(recBytes)
 		if err != nil {
 			return fmt.Errorf("failed to decoding record: %w", err)
 		}
@@ -160,17 +157,17 @@ func (w *WAL) Restore(mem *memtable.MemTable) error {
 }
 
 //TODO: old wal files need to remove
-func (w *WAL) Close() error {
-	w.logFile.Sync()
-	filename := w.logFile.Name()
-	if err := w.logFile.Close(); err != nil {
+func (wlog *WAL) Close() error {
+	wlog.logFile.Sync()
+	filename := wlog.logFile.Name()
+	if err := wlog.logFile.Close(); err != nil {
 		return fmt.Errorf("failed attempting to close WAL log file: %w", err)
 	}
 
 	// TODO: if this fails, the log file is closed and future calls to Close will error
 	// on the os.File#Close call. Could leave an old WAL around
 	if err := os.Remove(filename); err != nil {
-		w.logFile.Close()
+		wlog.logFile.Close()
 		os.Remove(filename)
 		return fmt.Errorf("failed attempting to remove WAL file: %w", err)
 	}

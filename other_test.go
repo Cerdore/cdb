@@ -150,7 +150,7 @@ import (
 
 // }
 
-func TestDataExists(t *testing.T) {
+func TestDataExists1(t *testing.T) {
 	db, err := New("chen34", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
@@ -187,7 +187,7 @@ func TestDataExists(t *testing.T) {
 	// db1.Close()
 }
 
-func TestDataExists(t *testing.T) {
+func TestDataExists2(t *testing.T) {
 	db, err := New("chen37", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
@@ -201,7 +201,7 @@ func TestDataExists(t *testing.T) {
 }
 
 func TestDataLaExists(t *testing.T) {
-	db, err := New("chen41", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := New("chen50", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -225,13 +225,23 @@ func TestDataPut(t *testing.T) {
 }
 
 func TestDataPut1(t *testing.T) {
-	d, err := Open("chen49", DBOpts{dataDir: "", mtSizeLimit: 0})
+	d, err := Open("chen50", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
 	// for i := 0; i < 1000000; i++ {
 	// 	d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
 	// }
-	d.Put([]byte("kk1"), []byte("kkv"))
+	//d.Put([]byte("kk1"), []byte("kkv"))
+	ans, err1 := d.Get([]byte(fmt.Sprintf("mykey%7dx", 720016)))
+	if err1 != nil {
+		t.Log(err)
+	}
+	if ans != nil {
+		fmt.Println(string(ans))
+	} else {
+		fmt.Println("not found")
+	}
+
 	d.Close()
 }

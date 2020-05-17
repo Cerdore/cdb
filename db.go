@@ -2,8 +2,8 @@ package cdb
 
 import (
 	"bufio"
+	"cdb/bloom"
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -268,6 +268,10 @@ func (d *DB) Get(key []byte) ([]byte, error) {
 					break levelTraversal
 				}
 				if meta.ContainsKey(key) {
+					bloom := bloom.RecoverBloom(meta.Bits)
+					if !bloom.Check(key) {
+						return nil, nil
+					}
 					val, err := d.searchSSTable(key, meta)
 					if err != nil {
 						return nil, fmt.Errorf("failed attempting to scan sstable for key %s: %w", string(key), err)
@@ -366,7 +370,7 @@ func (d *DB) compactionWatcher() {
 	}
 }
 
-func (d *DB) flushMemTable(tableName string, writer io.Writer, memNum uint32) error {
+func (d *DB) flushMemTable(tableName string, writer *os.File, memNum uint32) error {
 	iter := d.compactingMemTable.InternalIterator()
 
 	fmt.Println(d.compactingMemTable.Num())
