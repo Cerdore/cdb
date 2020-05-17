@@ -7,11 +7,13 @@ import (
 	"strings"
 
 	"cdb/memtable/interfaces"
+
 	log "github.com/sirupsen/logrus"
 )
 
 // TODO: make configurable?
-const maxLevels = 32
+const maxLevels = 12
+const kBranching = 4
 
 // Node represents a node in the SkipList structure
 type Node struct {
@@ -31,6 +33,7 @@ type SkipList struct {
 	head   *Node
 	levels int
 	size   uint32
+	num    uint32
 }
 
 var _ interfaces.InMemoryStore = &SkipList{}
@@ -82,6 +85,7 @@ func (s *SkipList) Put(key []byte, value []byte) {
 	} else {
 		s.insert(key, value)
 		s.size += uint32(len(key) + len(value))
+		s.num++
 	}
 
 }
@@ -239,16 +243,22 @@ func (s *SkipList) printNode(i int, keysLoc map[string]int, nodeWidth int) {
 // Level generation shamelessly stolen from
 //https://igoro.com/archive/skip-lists-are-fascinating/
 func (s *SkipList) generateLevels() int {
-	levels := 0
-	for num := rand.Int31(); num&1 == 1; num >>= 1 {
-		levels += 1
-	}
+	// levels := 0
+	// for num := rand.Int31(); num&1 == 1; num >>= 1 {
+	// 	levels += 1
+	// }
 
-	if levels == 0 {
-		levels = 1
-	}
+	// if levels == 0 {
+	// 	levels = 1
+	// }
 
-	return levels
+	// return levels
+
+	height := 1
+	for height < maxLevels && (rand.Intn(kBranching) == 0) {
+		height++
+	}
+	return height
 }
 
 func (s *SkipList) InternalIterator() interfaces.InternalIterator {
@@ -257,4 +267,8 @@ func (s *SkipList) InternalIterator() interfaces.InternalIterator {
 
 func (s *SkipList) Size() uint32 {
 	return s.size
+}
+
+func (s *SkipList) Num() uint32 {
+	return s.num
 }

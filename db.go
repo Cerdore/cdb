@@ -50,8 +50,8 @@ const (
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	mtSizeLimit = uint32(4194304)
-	//mtSizeLimit = uint32(1024 * 1024)
+	//mtSizeLimit = uint32(4194304)
+	mtSizeLimit = uint32(2 * 1024 * 1024)
 	//mtSizeLimit = uint32(4096)
 )
 
@@ -366,11 +366,13 @@ func (d *DB) compactionWatcher() {
 	}
 }
 
-func (d *DB) flushMemTable(tableName string, writer io.Writer) error {
+func (d *DB) flushMemTable(tableName string, writer io.Writer, memNum uint32) error {
 	iter := d.compactingMemTable.InternalIterator()
 
+	fmt.Println(d.compactingMemTable.Num())
+
 	builder := sstable.NewBuilder(tableName, iter, 0, writer)
-	metadata, err := builder.WriteTable()
+	metadata, err := builder.WriteTable(memNum)
 	if err != nil {
 		return fmt.Errorf("could not write memtable to level 0 sstable: %w", err)
 	}
@@ -386,7 +388,8 @@ func (d *DB) doCompaction() error {
 			return fmt.Errorf("failed attempt to create new sstable file: %w", err)
 		}
 		defer file.Close()
-		err = d.flushMemTable(filepath.Base(file.Name()), file)
+
+		err = d.flushMemTable(filepath.Base(file.Name()), file, d.compactingMemTable.Num())
 
 		if err == nil {
 			if err = file.Sync(); err != nil {
@@ -402,6 +405,8 @@ func (d *DB) doCompaction() error {
 
 			d.compactingMemTable = nil
 			d.compactingWAL = nil
+		} else {
+			fmt.Println("Closed error %w: ", err)
 		}
 	}
 

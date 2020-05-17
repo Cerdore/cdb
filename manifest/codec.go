@@ -17,7 +17,7 @@ func (c *Codec) EncodeEntry(entry *Entry) ([]byte, error) {
 	// 1 deleted byte + 1 level byte + 1 byte for filename length + len(filename) bytes
 	// + 4 bytes for start key len + len(start_key) bytes
 	// + 4 bytes for end key len + len(end_key) bytes
-	totalLen := 3 + len(entry.metadata.Filename) + 4 + len(entry.metadata.StartKey) + 4 + len(entry.metadata.EndKey)
+	totalLen := 3 + len(entry.metadata.Filename) + 4 + len(entry.metadata.StartKey) + 4 + len(entry.metadata.EndKey) + 4 + len(entry.metadata.Bits)
 	if err := binary.Write(&buf, binary.BigEndian, uint32(totalLen)); err != nil {
 		return nil, fmt.Errorf("failed to encode total entry length: %w", err)
 	}
@@ -36,6 +36,10 @@ func (c *Codec) EncodeEntry(entry *Entry) ([]byte, error) {
 
 	if err := encodeVarLengthField(&buf, entry.metadata.EndKey, 4); err != nil {
 		return nil, fmt.Errorf("failed to encode endKey for entry: %w", err)
+	}
+
+	if err := encodeVarLengthField(&buf, entry.metadata.Bits, 4); err != nil {
+		return nil, fmt.Errorf("failed to encode Bits for entry: %w", err)
 	}
 
 	if err := binary.Write(&buf, binary.BigEndian, entry.deleted); err != nil {
@@ -95,6 +99,11 @@ func (c *Codec) DecodeEntry(data []byte) (*Entry, error) {
 		return nil, fmt.Errorf("failed decoding endKey field: %w", err)
 	}
 
+	bits, err := decodeVarLengthField(reader, 4)
+	if err != nil {
+		return nil, fmt.Errorf("failed decoding bits field: %w", err)
+	}
+
 	var deleted bool
 	if err := binary.Read(reader, binary.BigEndian, &deleted); err != nil {
 		return nil, fmt.Errorf("failed to decode deletion status of entry: %w", err)
@@ -106,6 +115,7 @@ func (c *Codec) DecodeEntry(data []byte) (*Entry, error) {
 			Filename: string(fileName),
 			StartKey: startKey,
 			EndKey:   endKey,
+			Bits:     bits,
 		},
 		deleted: deleted,
 	}, nil

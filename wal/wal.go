@@ -171,6 +171,7 @@ func (w *WAL) Close() error {
 	// on the os.File#Close call. Could leave an old WAL around
 	if err := os.Remove(filename); err != nil {
 		w.logFile.Close()
+		os.Remove(filename)
 		return fmt.Errorf("failed attempting to remove WAL file: %w", err)
 	}
 	return nil
