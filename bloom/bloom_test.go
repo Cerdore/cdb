@@ -8,18 +8,18 @@ import (
 
 func TestBloom(t *testing.T) {
 	n := 100000
-	bloom := newBloom(n)
+	bloom := NewBloom(n)
 
 	for i := 0; i < n; i++ {
 		key := strconv.Itoa(i)
-		bloom.Insert(key)
+		bloom.Insert([]byte(key))
 	}
 
 	falsePositives := 0
 
 	for i := 0; i < n*2; i++ {
 		key := strconv.Itoa(i)
-		result := bloom.Check(key)
+		result := bloom.Check([]byte(key))
 		if i < n {
 			if !result {
 				t.Fatalf("Encountered False Negative!")
