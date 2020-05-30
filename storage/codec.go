@@ -56,7 +56,7 @@ func (c *Codec) Encode(record *Record) ([]byte, error) {
 	}
 
 	if record.Type == RecordUpdate {
-		if err := binary.Write(&buf, binary.BigEndian, int32(len(value))); err != nil {
+		if err := binary.Write(&buf, binary.BigEndian, uint32(len(value))); err != nil {
 			return nil, fmt.Errorf("failed to encode value length: %w", err)
 		}
 
