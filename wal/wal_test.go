@@ -8,10 +8,10 @@ import (
 	"path"
 	"testing"
 
-	"cdb/memtable"
+	"github.com/cerdore/cdb/memtable"
 
-	"cdb/storage"
-	"cdb/test"
+	"github.com/cerdore/cdb/storage"
+	"github.com/cerdore/cdb/test"
 	"github.com/stretchr/testify/assert"
 )
 

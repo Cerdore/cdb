@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"cdb/bloom"
-	"cdb/memtable/interfaces"
-	"cdb/storage"
-	"cdb/util"
+	"github.com/cerdore/cdb/bloom"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/storage"
+	"github.com/cerdore/cdb/util"
 )
 
 // Builder is a structure that can take an iterator from a memtable data structure and use

@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"cdb/memtable"
-	"cdb/storage"
-	"cdb/util"
+	"github.com/cerdore/cdb/memtable"
+	"github.com/cerdore/cdb/storage"
+	"github.com/cerdore/cdb/util"
 )
 
 // WAL is the structure representing the writeahead log. All updates (incl. deletes)

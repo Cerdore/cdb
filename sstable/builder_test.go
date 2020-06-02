@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"cdb/memtable"
-	"cdb/storage"
+	"github.com/cerdore/cdb/memtable"
+	"github.com/cerdore/cdb/storage"
 	"github.com/stretchr/testify/assert"
 )
 

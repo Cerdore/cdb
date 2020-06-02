@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"cdb/test"
+	"github.com/cerdore/cdb/test"
 
-	"cdb/memtable"
-	"cdb/util"
+	"github.com/cerdore/cdb/memtable"
+	"github.com/cerdore/cdb/util"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,8 +1,8 @@
 package skiplist
 
 import (
-	"cdb/memtable/interfaces"
-	"cdb/storage"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/storage"
 	log "github.com/sirupsen/logrus"
 )
 

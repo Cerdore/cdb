@@ -7,10 +7,10 @@ import (
 	"os"
 	"path"
 
-	"cdb/manifest"
+	"github.com/cerdore/cdb/manifest"
 
-	"cdb/sstable"
-	"cdb/storage"
+	"github.com/cerdore/cdb/sstable"
+	"github.com/cerdore/cdb/storage"
 
 	log "github.com/sirupsen/logrus"
 )

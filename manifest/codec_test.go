@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"cdb/sstable"
+	"github.com/cerdore/cdb/sstable"
 	"github.com/stretchr/testify/assert"
 )
 

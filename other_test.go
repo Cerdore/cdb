@@ -1,4 +1,4 @@
-package cdb
+package github.com/cerdore/cdb
 
 import (
 	"fmt"

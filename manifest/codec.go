@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"cdb/sstable"
+	"github.com/cerdore/cdb/sstable"
 )
 
 type Codec struct{}

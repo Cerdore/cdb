@@ -1,4 +1,4 @@
-module cdb
+module github.com/cerdore/cdb
 
 go 1.14
 

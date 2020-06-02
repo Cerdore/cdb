@@ -10,8 +10,8 @@ import (
 	"sort"
 	"time"
 
-	"cdb/sstable"
-	"cdb/util"
+	"github.com/cerdore/cdb/sstable"
+	"github.com/cerdore/cdb/util"
 	log "github.com/sirupsen/logrus"
 )
 

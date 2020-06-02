@@ -6,7 +6,7 @@ import (
 	"io"
 	"log"
 
-	"cdb/storage"
+	"github.com/cerdore/cdb/storage"
 )
 
 // Search searches for a key in the provided io. If key not found, then

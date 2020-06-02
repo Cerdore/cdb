@@ -1,8 +1,8 @@
-package cdb
+package github.com/cerdore/cdb
 
 import (
 	"bufio"
-	"cdb/bloom"
+	"github.com/cerdore/cdb/bloom"
 	"fmt"
 	"os"
 	"path"
@@ -10,12 +10,12 @@ import (
 	"strconv"
 	"sync"
 
-	"cdb/compaction"
-	"cdb/manifest"
-	"cdb/memtable"
-	"cdb/sstable"
-	"cdb/storage"
-	"cdb/wal"
+	"github.com/cerdore/cdb/compaction"
+	"github.com/cerdore/cdb/manifest"
+	"github.com/cerdore/cdb/memtable"
+	"github.com/cerdore/cdb/sstable"
+	"github.com/cerdore/cdb/storage"
+	"github.com/cerdore/cdb/wal"
 
 	log "github.com/sirupsen/logrus"
 )

@@ -2,14 +2,15 @@ package sstable
 
 import (
 	"bytes"
-	"cdb/bloom"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 
-	"cdb/storage"
+	"github.com/cerdore/cdb/bloom"
+
+	"github.com/cerdore/cdb/storage"
 
 	log "github.com/sirupsen/logrus"
 )

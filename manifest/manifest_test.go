@@ -7,9 +7,9 @@ import (
 	"path"
 	"testing"
 
-	"cdb/sstable"
+	"github.com/cerdore/cdb/sstable"
 
-	"cdb/test"
+	"github.com/cerdore/cdb/test"
 	"github.com/stretchr/testify/assert"
 )
 

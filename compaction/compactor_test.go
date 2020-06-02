@@ -4,11 +4,11 @@ import (
 	"path"
 	"testing"
 
-	"cdb/manifest"
-	"cdb/memtable/interfaces"
-	"cdb/sstable"
-	"cdb/test"
-	"cdb/util"
+	"github.com/cerdore/cdb/manifest"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/sstable"
+	"github.com/cerdore/cdb/test"
+	"github.com/cerdore/cdb/util"
 	"github.com/stretchr/testify/assert"
 )
 
