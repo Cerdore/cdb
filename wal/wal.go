@@ -70,14 +70,39 @@ func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
 }
 
 // Write writes the record to the writeahead log
-func (wlog *WAL) Write(record *storage.Record) error {
+func (wlog *WAL) WriteSync(record *storage.Record) error {
+	data, err := wlog.codec.Encode(record)
+	if err != nil {
+		return fmt.Errorf("failed encoding data to write to log: %w", err)
+	}
+
+	if n, err := wlog.logFile.Write(data); n != len(data) {
+		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
+			n, len(data), err)
+	} else if err != nil {
+		return fmt.Errorf("failed to write data to log: %w", err)
+	}
+
+	// update current size of WAL
+	wlog.size += uint32(len(data))
+
+	// if syncW == true {
+	// 	if err := wlog.logFile.Sync(); err != nil {
+	// 		return fmt.Errorf("failed syncing data to disk: %w", err)
+	// 	}
+	// }
+
+	return nil
+}
+
+func (wlog *WAL) Write(record *storage.Record, syncW bool) error {
 	//t1 := time.Now()
 	data, err := wlog.codec.Encode(record)
 	if err != nil {
 		return fmt.Errorf("failed encoding data to write to log: %w", err)
 	}
 	//el1 := time.Since(t1)
-	//t2 := time.Now()
+	t2 := time.Now()
 
 	// if n, err := wlog.logFile.Write(data); n != len(data) {
 	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
@@ -93,8 +118,8 @@ func (wlog *WAL) Write(record *storage.Record) error {
 		return fmt.Errorf("failed to write data to log: %w", err)
 	}
 
-	//el2 := time.Since(t2)
-	//	t3 := time.Now()
+	el2 := time.Since(t2)
+	t3 := time.Now()
 
 	// update current size of WAL
 	wlog.size += uint32(len(data))
@@ -102,19 +127,18 @@ func (wlog *WAL) Write(record *storage.Record) error {
 	if err := wlog.writer.Flush(); err != nil {
 		return fmt.Errorf("failed to flush into log: %w", err)
 	}
+	el3 := time.Since(t3)
+	fmt.Println(el2, el3)
 
-	// if err := wlog.logFile.Sync(); err != nil {
-	// 	return fmt.Errorf("failed syncing data to disk: %w", err)
-	// }
-
-	return nil
-}
-func (wlog *WAL) Sync() error {
-	if err := wlog.logFile.Sync(); err != nil {
-		return fmt.Errorf("failed syncing data to disk: %w", err)
+	if syncW == true {
+		if err := wlog.logFile.Sync(); err != nil {
+			return fmt.Errorf("failed syncing data to disk: %w", err)
+		}
 	}
+
 	return nil
 }
+
 func (wlog *WAL) Size() uint32 {
 	return wlog.size
 }

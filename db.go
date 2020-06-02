@@ -46,7 +46,7 @@ type DB struct {
 
 // TODO: allow configuration via options provided to constructor
 const (
-	// Makes sense on Mac OS X, may not elsewhere
+	// Makes sense on Linux, may not elsewhere
 	datadir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
@@ -300,11 +300,11 @@ func (d *DB) searchSSTable(key []byte, meta *sstable.Metadata) ([]byte, error) {
 }
 
 // Put inserts or updates the value if the key already exists
-func (d *DB) Put(key []byte, value []byte) error {
+func (d *DB) Put(key []byte, value []byte, syncW bool) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	if err := d.walog.Write(storage.NewRecord(key, value, false)); err != nil {
+	if err := d.walog.Write(storage.NewRecord(key, value, false), syncW); err != nil {
 		return fmt.Errorf("failed attempting write put to WAL: %w", err)
 	}
 
@@ -342,11 +342,11 @@ func (d *DB) Put(key []byte, value []byte) error {
 }
 
 // Deletes the specified key from the data store
-func (d *DB) Delete(key []byte) error {
+func (d *DB) Delete(key []byte, syncW bool) error {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
-	if err := d.walog.Write(storage.NewRecord(key, nil, true)); err != nil {
+	if err := d.walog.Write(storage.NewRecord(key, nil, true), syncW); err != nil {
 		return fmt.Errorf("failed attempting write delete to WAL: %w", err)
 	}
 	d.memTable.Delete(key)

@@ -188,7 +188,7 @@ func TestDataExists1(t *testing.T) {
 }
 
 func TestDataExists2(t *testing.T) {
-	db, err := New("chen37", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := New("chen99", DBOpts{dataDir: "", mtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
