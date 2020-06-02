@@ -1,14 +1,15 @@
-package github.com/cerdore/cdb
+package cdb
 
 import (
 	"bufio"
-	"github.com/cerdore/cdb/bloom"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
 	"sync"
+
+	"github.com/cerdore/cdb/bloom"
 
 	"github.com/cerdore/cdb/compaction"
 	"github.com/cerdore/cdb/manifest"
