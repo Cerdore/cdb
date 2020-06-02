@@ -118,19 +118,19 @@ func (wlog *WAL) Write(record *storage.Record, syncW bool) error {
 		return fmt.Errorf("failed to write data to log: %w", err)
 	}
 
-	el2 := time.Since(t2)
-	t3 := time.Now()
+	// el2 := time.Since(t2)
+	// t3 := time.Now()
 
 	// update current size of WAL
 	wlog.size += uint32(len(data))
 
-	if err := wlog.writer.Flush(); err != nil {
-		return fmt.Errorf("failed to flush into log: %w", err)
-	}
-	el3 := time.Since(t3)
-	fmt.Println(el2, el3)
+	// el3 := time.Since(t3)
+	// fmt.Println(el2, el3)
 
 	if syncW == true {
+		if err := wlog.writer.Flush(); err != nil {
+			return fmt.Errorf("failed to flush into log: %w", err)
+		}
 		if err := wlog.logFile.Sync(); err != nil {
 			return fmt.Errorf("failed syncing data to disk: %w", err)
 		}
