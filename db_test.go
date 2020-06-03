@@ -22,7 +22,7 @@ func TestDB_RoundTrip(t *testing.T) {
 	//defer cleanup(dbName, dir)
 	assert.NoError(t, err)
 
-	err = db.Put([]byte("foo"), []byte("bar"))
+	err = db.Put([]byte("foo"), []byte("bar"), false)
 	assert.NoError(t, err)
 
 	val, err := db.Get([]byte("foo"))
@@ -62,8 +62,8 @@ func TestDB_GetFromSSTable(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	assert.NoError(t, db.Put([]byte("foo"), []byte("bar")))
-	assert.NoError(t, db.Put([]byte("bar"), []byte("baz")))
+	assert.NoError(t, db.Put([]byte("foo"), []byte("bar"), false))
+	assert.NoError(t, db.Put([]byte("bar"), []byte("baz"), false))
 
 	db.compactingWAL = db.walog
 	db.compactingMemTable = db.memTable
@@ -240,8 +240,8 @@ func TestMemtableFlush(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	assert.NoError(t, db.Put([]byte("foo"), []byte("bar")))
-	assert.NoError(t, db.Put([]byte("bar"), []byte("baz")))
+	assert.NoError(t, db.Put([]byte("foo"), []byte("bar"), false))
+	assert.NoError(t, db.Put([]byte("bar"), []byte("baz"), false))
 
 	db.compactingWAL = db.walog
 	db.compactingMemTable = db.memTable

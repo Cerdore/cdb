@@ -102,7 +102,7 @@ func (wlog *WAL) Write(record *storage.Record, syncW bool) error {
 		return fmt.Errorf("failed encoding data to write to log: %w", err)
 	}
 	//el1 := time.Since(t1)
-	t2 := time.Now()
+	//t2 := time.Now()
 
 	// if n, err := wlog.logFile.Write(data); n != len(data) {
 	// 	return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",

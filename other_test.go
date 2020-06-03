@@ -11,7 +11,7 @@ import (
 // 	// 	panic(err)
 // 	// }
 // 	// for i := 0; i < 400; i++ {
-// 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+// 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
 // 	// 	if db.memTable.Size() > db.mtSizeLimit {
 // 	// 		fmt.Printf("MTSize oversize")
 // 	// 	}
@@ -45,7 +45,7 @@ import (
 // 	// 	panic(err)
 // 	// }
 // 	// for i := 0; i < 400; i++ {
-// 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+// 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
 // 	// 	if db.memTable.Size() > db.mtSizeLimit {
 // 	// 		fmt.Printf("MTSize oversize")
 // 	// 	}
@@ -57,7 +57,7 @@ import (
 // 		panic(err)
 // 	}
 // 	for i := 0; i < 1000; i++ {
-// 		db1.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+// 		db1.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
 // 	}
 
 // 	db1.Close()
@@ -71,7 +71,7 @@ import (
 // 		panic(err)
 // 	}
 // 	for i := 0; i < 1000000; i++ {
-// 		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+// 		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
 // 	}
 
 // 	d.Close()
@@ -100,7 +100,7 @@ import (
 // 	if err != nil {
 // 		t.Log(err)
 // 	}
-// 	db.Put([]byte("kk1"), []byte("kv23"))
+// 	db.Put([]byte("kk1"), []byte("kv23"),false)
 
 // 	ans, err := db.Get([]byte("kk1"))
 // 	if err != nil {
@@ -125,8 +125,8 @@ import (
 // 	if err != nil {
 // 		t.Log(err)
 // 	}
-// 	//	db.Put([]byte("kk1"), []byte("kv23"))
-// 	db.Delete([]byte("kk1"))
+// 	//	db.Put([]byte("kk1"), []byte("kv23"),false)
+// 	db.Delete([]byte("kk1"),false)
 // 	ans, err := db.Get([]byte("kk1"))
 // 	if err != nil {
 // 		t.Log(err)
@@ -156,7 +156,7 @@ func TestDataExists1(t *testing.T) {
 		panic(err)
 	}
 	for i := 1000; i < 200000; i++ {
-		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
 	}
 
 	db.Close()
@@ -193,7 +193,7 @@ func TestDataExists2(t *testing.T) {
 		panic(err)
 	}
 	for i := 1; i < 200000; i++ {
-		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
 	}
 
 	db.Close()
@@ -206,7 +206,7 @@ func TestDataLaExists(t *testing.T) {
 		panic(err)
 	}
 	for i := 1; i < 1000000; i++ {
-		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
 	}
 
 	db.Close()
@@ -219,7 +219,7 @@ func TestDataPut(t *testing.T) {
 		panic(err)
 	}
 	for i := 0; i < 1000000; i++ {
-		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
 	}
 	d.Close()
 }
@@ -230,9 +230,9 @@ func TestDataPut1(t *testing.T) {
 		panic(err)
 	}
 	// for i := 0; i < 1000000; i++ {
-	// 	d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)))
+	// 	d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
 	// }
-	//d.Put([]byte("kk1"), []byte("kkv"))
+	//d.Put([]byte("kk1"), []byte("kkv"),false)
 	ans, err1 := d.Get([]byte(fmt.Sprintf("mykey%7dx", 720016)))
 	if err1 != nil {
 		t.Log(err)
