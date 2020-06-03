@@ -19,13 +19,13 @@ import (
 // different compaction behavior
 type Compactor struct {
 	manifest *manifest.Manifest
-	dataDir  string
+	DataDir  string
 	dbName   string
 	codec    *storage.Codec
 }
 
-func New(manifest *manifest.Manifest, dataDir string, dbName string) *Compactor {
-	return &Compactor{manifest: manifest, dataDir: dataDir, dbName: dbName, codec: &storage.Codec{}}
+func New(manifest *manifest.Manifest, DataDir string, dbName string) *Compactor {
+	return &Compactor{manifest: manifest, DataDir: DataDir, dbName: dbName, codec: &storage.Codec{}}
 }
 
 func (c *Compactor) Compact() error {
@@ -66,7 +66,7 @@ func (c *Compactor) shouldCompact(level int) (bool, error) {
 func (c *Compactor) aboveCompactionThreshold(level int) (bool, error) {
 	lvlSz := int64(0)
 	for _, meta := range c.manifest.MetadataForLevel(level) {
-		info, err := os.Stat(path.Join(c.dataDir, c.dbName, meta.Filename))
+		info, err := os.Stat(path.Join(c.DataDir, c.dbName, meta.Filename))
 		if err != nil {
 			return false, fmt.Errorf("failed calculating level %d size: %w", level, err)
 		}
@@ -125,7 +125,7 @@ func (c *Compactor) identifyMergeCandidates(level int) []*sstable.Metadata {
 }
 
 func (c *Compactor) merge(level int, meta []*sstable.Metadata) ([]*sstable.Metadata, error) {
-	return sstable.NewMerger(level, level+1, meta, c.dataDir, c.dbName).Merge()
+	return sstable.NewMerger(level, level+1, meta, c.DataDir, c.dbName).Merge()
 }
 
 func (c *Compactor) updateManifest(oldSsts []*sstable.Metadata, newSsts []*sstable.Metadata) error {

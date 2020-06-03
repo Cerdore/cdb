@@ -29,7 +29,7 @@ import (
 // Calls to Get, Put, Delete are thread-safe
 type DB struct {
 	name    string
-	dataDir string
+	DataDir string
 
 	mutex     sync.RWMutex
 	memTable  *memtable.MemTable
@@ -41,33 +41,33 @@ type DB struct {
 	compactingWAL      *wal.WAL
 	compact            chan bool
 	stopWatching       chan bool
-	mtSizeLimit        uint32
+	MtSizeLimit        uint32
 	wg                 sync.WaitGroup
 }
 
 // TODO: allow configuration via options provided to constructor
 const (
 	// Makes sense on Linux, may not elsewhere
-	datadir  = "/home/cerdore/kdb"
+	DataDir  = "/home/cerdore/kdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
-	//mtSizeLimit = uint32(4194304)
-	mtSizeLimit = uint32(2 * 1024 * 1024)
-	//mtSizeLimit = uint32(4096)
+	//MtSizeLimit = uint32(4194304)
+	MtSizeLimit = uint32(2 * 1024 * 1024)
+	//MtSizeLimit = uint32(4096)
 )
 
 type DBOpts struct {
-	dataDir     string
-	mtSizeLimit uint32
+	DataDir     string
+	MtSizeLimit uint32
 }
 
 func (o *DBOpts) applyDefaults() {
-	if o.dataDir == "" {
-		o.dataDir = datadir
+	if o.DataDir == "" {
+		o.DataDir = DataDir
 	}
 
-	if o.mtSizeLimit == 0 {
-		o.mtSizeLimit = mtSizeLimit
+	if o.MtSizeLimit == 0 {
+		o.MtSizeLimit = MtSizeLimit
 	}
 }
 
@@ -76,13 +76,13 @@ func (o *DBOpts) applyDefaults() {
 func New(name string, opts DBOpts) (*DB, error) {
 	opts.applyDefaults()
 
-	if err := os.MkdirAll(opts.dataDir, 0755); err != nil {
-		return nil, fmt.Errorf("could not create data dir %s: %w", opts.dataDir, err)
+	if err := os.MkdirAll(opts.DataDir, 0755); err != nil {
+		return nil, fmt.Errorf("could not create data dir %s: %w", opts.DataDir, err)
 	}
 
-	dbPath := path.Join(opts.dataDir, name)
+	dbPath := path.Join(opts.DataDir, name)
 
-	if exists, err := exists(name, opts.dataDir); !exists {
+	if exists, err := exists(name, opts.DataDir); !exists {
 		if err := os.Mkdir(dbPath, 0755); err != nil {
 			return nil, fmt.Errorf("failed creating data directory for database %s: %w", name, err)
 		}
@@ -95,9 +95,9 @@ func New(name string, opts DBOpts) (*DB, error) {
 	return Open(name, opts)
 }
 
-func lock(name string, dataDir string) error {
+func lock(name string, DataDir string) error {
 	pid := os.Getpid()
-	lockPath := path.Join(dataDir, name, lockFile)
+	lockPath := path.Join(DataDir, name, lockFile)
 
 	lock, err := os.Open(lockPath)
 	// Database is not currently locked, attempt to acquire
@@ -140,7 +140,7 @@ func lock(name string, dataDir string) error {
 func Open(name string, opts DBOpts) (*DB, error) {
 	opts.applyDefaults()
 
-	if exists, err := exists(name, opts.dataDir); !exists {
+	if exists, err := exists(name, opts.DataDir); !exists {
 		if err == nil {
 			return nil, fmt.Errorf("failed opening database %s. does not exist", name)
 		} else {
@@ -148,20 +148,20 @@ func Open(name string, opts DBOpts) (*DB, error) {
 		}
 	}
 
-	if err := lock(name, opts.dataDir); err != nil {
+	if err := lock(name, opts.DataDir); err != nil {
 		return nil, fmt.Errorf("could not lock database: %w", err)
 	}
 
 	mem := memtable.New()
 
 	// Attempt to load WAL if exists. Otherwise create a new one
-	found, walog, err := wal.FindExisting(name, opts.dataDir)
+	found, walog, err := wal.FindExisting(name, opts.DataDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed attempting to look for existing WAL file: %w", err)
 	}
 
 	if !found {
-		waf, err := wal.CreateFile(name, opts.dataDir)
+		waf, err := wal.CreateFile(name, opts.DataDir)
 		if err != nil {
 			return nil, fmt.Errorf("could not create WAL file: %w", err)
 		}
@@ -172,11 +172,11 @@ func Open(name string, opts DBOpts) (*DB, error) {
 		}
 	}
 
-	found, man, err := manifest.LoadLatest(name, opts.dataDir)
+	found, man, err := manifest.LoadLatest(name, opts.DataDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed attempting to load manifest file: %w", err)
 	} else if !found {
-		maf, err := manifest.CreateManifestFile(name, opts.dataDir)
+		maf, err := manifest.CreateManifestFile(name, opts.DataDir)
 		if err != nil {
 			return nil, fmt.Errorf("could not create manifest file: %w", err)
 		}
@@ -187,12 +187,12 @@ func Open(name string, opts DBOpts) (*DB, error) {
 		memTable:     mem,
 		walog:        walog,
 		manifest:     man,
-		compactor:    compaction.New(man, opts.dataDir, name),
+		compactor:    compaction.New(man, opts.DataDir, name),
 		name:         name,
-		dataDir:      opts.dataDir,
+		DataDir:      opts.DataDir,
 		compact:      make(chan bool, 1),
 		stopWatching: make(chan bool),
-		mtSizeLimit:  opts.mtSizeLimit,
+		MtSizeLimit:  opts.MtSizeLimit,
 	}
 	db.wg.Add(1)
 	go db.compactionWatcher()
@@ -200,8 +200,8 @@ func Open(name string, opts DBOpts) (*DB, error) {
 	return db, nil
 }
 
-func exists(name string, datadir string) (bool, error) {
-	dbPath := path.Join(datadir, name)
+func exists(name string, DataDir string) (bool, error) {
+	dbPath := path.Join(DataDir, name)
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return false, nil
 	} else if err != nil {
@@ -215,7 +215,7 @@ func exists(name string, datadir string) (bool, error) {
 func OpenOrNew(name string, opts DBOpts) (*DB, error) {
 	opts.applyDefaults()
 
-	dbExists, err := exists(name, opts.dataDir)
+	dbExists, err := exists(name, opts.DataDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed checking if database %s already exists: %v", name, err)
 	}
@@ -243,7 +243,7 @@ func (d *DB) Close() error {
 }
 
 func (d *DB) unlock() error {
-	lockPath := path.Join(d.dataDir, d.name, lockFile)
+	lockPath := path.Join(d.DataDir, d.name, lockFile)
 	return os.Remove(lockPath)
 }
 
@@ -291,7 +291,7 @@ func (d *DB) Get(key []byte) ([]byte, error) {
 
 func (d *DB) searchSSTable(key []byte, meta *sstable.Metadata) ([]byte, error) {
 	// TODO: cache this instead of opening and closing every time
-	sstHandle, err := os.Open(path.Join(d.dataDir, d.name, meta.Filename))
+	sstHandle, err := os.Open(path.Join(d.DataDir, d.name, meta.Filename))
 	if err != nil {
 		return nil, fmt.Errorf("failed attempting to open sstable for reading: %w", err)
 	}
@@ -312,14 +312,14 @@ func (d *DB) Put(key []byte, value []byte, syncW bool) error {
 	d.memTable.Put(key, value)
 
 	// compactingMemTable not being nil indicating that a compaction is already underway
-	if d.memTable.Size() > d.mtSizeLimit && d.compactingMemTable == nil {
+	if d.memTable.Size() > d.MtSizeLimit && d.compactingMemTable == nil {
 		//fmt.Println("begin to Compact ")
 		d.compactingMemTable = d.memTable
 		d.compactingWAL = d.walog
 
 		d.memTable = memtable.New()
 
-		waf, err := wal.CreateFile(d.name, d.dataDir)
+		waf, err := wal.CreateFile(d.name, d.DataDir)
 		if err != nil {
 			// Abort compaction attempt
 			d.memTable = d.compactingMemTable
@@ -388,7 +388,7 @@ func (d *DB) flushMemTable(tableName string, writer *os.File, memNum uint32) err
 func (d *DB) doCompaction() error {
 	defer d.wg.Done()
 	if d.compactingMemTable != nil {
-		file, err := sstable.CreateFile(d.name, d.dataDir)
+		file, err := sstable.CreateFile(d.name, d.DataDir)
 		if err != nil {
 			return fmt.Errorf("failed attempt to create new sstable file: %w", err)
 		}

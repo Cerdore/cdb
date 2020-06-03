@@ -6,19 +6,19 @@ import (
 )
 
 // func TestOpen1(t *testing.T) {
-// 	// db, err := New("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	// db, err := New("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	// if err != nil {
 // 	// 	panic(err)
 // 	// }
 // 	// for i := 0; i < 400; i++ {
 // 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
-// 	// 	if db.memTable.Size() > db.mtSizeLimit {
+// 	// 	if db.memTable.Size() > db.MtSizeLimit {
 // 	// 		fmt.Printf("MTSize oversize")
 // 	// 	}
 // 	// }
 // 	// db.Close()
 
-// 	db1, err := Open("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	db1, err := Open("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		panic(err)
 // 	}
@@ -35,24 +35,24 @@ import (
 // 	}
 
 // 	db1.Close()
-// 	//os.RemoveAll(path.Join(datadir, "chen3"))
+// 	//os.RemoveAll(path.Join(DataDir, "chen3"))
 // }
 
 // func TestLargePut(t *testing.T) {
 // 	runtime.GOMAXPROCS(4)
-// 	db1, err := New("chen4", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	db1, err := New("chen4", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	// if err != nil {
 // 	// 	panic(err)
 // 	// }
 // 	// for i := 0; i < 400; i++ {
 // 	// 	db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)),false)
-// 	// 	if db.memTable.Size() > db.mtSizeLimit {
+// 	// 	if db.memTable.Size() > db.MtSizeLimit {
 // 	// 		fmt.Printf("MTSize oversize")
 // 	// 	}
 // 	// }
 // 	// db.Close()
 
-// 	//db1, err := Open("chen3", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	//db1, err := Open("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		panic(err)
 // 	}
@@ -61,12 +61,12 @@ import (
 // 	}
 
 // 	db1.Close()
-// 	//os.RemoveAll(path.Join(datadir, "chen3"))
+// 	//os.RemoveAll(path.Join(DataDir, "chen3"))
 // }
 
 // func TestTimeof(t *testing.T) {
 // 	//	runtime.GOMAXPROCS(4)
-// 	d, err := New("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	d, err := New("chen2", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		panic(err)
 // 	}
@@ -78,7 +78,7 @@ import (
 // }
 
 // func TestRestore(t *testing.T) {
-// 	db1, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	db1, err := Open("chen2", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		t.Log(err)
 // 	}
@@ -96,7 +96,7 @@ import (
 // }
 
 // func TestPutAGet(t *testing.T) {
-// 	db, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	db, err := Open("chen2", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		t.Log(err)
 // 	}
@@ -121,7 +121,7 @@ import (
 // }
 
 // func TestOpenAndDel(t *testing.T) {
-// 	db, err := Open("chen2", DBOpts{dataDir: "", mtSizeLimit: 0})
+// 	db, err := Open("chen2", DBOpts{DataDir: "", MtSizeLimit: 0})
 // 	if err != nil {
 // 		t.Log(err)
 // 	}
@@ -151,7 +151,7 @@ import (
 // }
 
 func TestDataExists1(t *testing.T) {
-	db, err := New("chen34", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := New("chen34", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -161,7 +161,7 @@ func TestDataExists1(t *testing.T) {
 
 	db.Close()
 
-	// db1, err := Open("chen24", DBOpts{dataDir: "", mtSizeLimit: 0})
+	// db1, err := Open("chen24", DBOpts{DataDir: "", MtSizeLimit: 0})
 	// if err != nil {
 	// 	panic(err)
 	// }
@@ -188,7 +188,7 @@ func TestDataExists1(t *testing.T) {
 }
 
 func TestDataExists2(t *testing.T) {
-	db, err := New("chen99", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := New("chen99", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -201,7 +201,7 @@ func TestDataExists2(t *testing.T) {
 }
 
 func TestDataLaExists(t *testing.T) {
-	db, err := New("chen50", DBOpts{dataDir: "", mtSizeLimit: 0})
+	db, err := New("chen50", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -214,7 +214,7 @@ func TestDataLaExists(t *testing.T) {
 }
 
 func TestDataPut(t *testing.T) {
-	d, err := New("chen49", DBOpts{dataDir: "", mtSizeLimit: 0})
+	d, err := New("chen49", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}
@@ -225,7 +225,7 @@ func TestDataPut(t *testing.T) {
 }
 
 func TestDataPut1(t *testing.T) {
-	d, err := Open("chen50", DBOpts{dataDir: "", mtSizeLimit: 0})
+	d, err := Open("chen50", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		panic(err)
 	}

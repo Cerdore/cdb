@@ -40,13 +40,13 @@ func NewEntry(metadata *sstable.Metadata, deleted bool) *Entry {
 	return &Entry{metadata: metadata, deleted: deleted}
 }
 
-func CreateManifestFile(dbName string, dataDir string) (*os.File, error) {
+func CreateManifestFile(dbName string, DataDir string) (*os.File, error) {
 	return util.CreateFile(fmt.Sprintf("%s_%s_%d", manifestPrefix, dbName, time.Now().UnixNano()/1_000_000_000),
-		dbName, dataDir)
+		dbName, DataDir)
 }
 
-func LoadLatest(dbName string, dataDir string) (bool, *Manifest, error) {
-	search := path.Join(dataDir, dbName, fmt.Sprintf("%s_%s_*", manifestPrefix, dbName))
+func LoadLatest(dbName string, DataDir string) (bool, *Manifest, error) {
+	search := path.Join(DataDir, dbName, fmt.Sprintf("%s_%s_*", manifestPrefix, dbName))
 	matches, err := filepath.Glob(search)
 	if err != nil {
 		return false, nil, fmt.Errorf("error loading manifest file: %w", err)

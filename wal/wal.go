@@ -36,14 +36,14 @@ func New(file *os.File) *WAL {
 	return &WAL{codec: storage.Codec{}, logFile: file, size: 0, writer: bufio.NewWriter(file)}
 }
 
-func CreateFile(dbName string, dataDir string) (*os.File, error) {
+func CreateFile(dbName string, DataDir string) (*os.File, error) {
 	return util.CreateFile(fmt.Sprintf("%s_%s_%d", walPrefix, dbName, time.Now().UnixNano()/1_000_000_000),
-		dbName, dataDir)
+		dbName, DataDir)
 }
 
 // FindExisting returns true and the WAL filename if an existing WAL is fine. Otherwise, returns false
-func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
-	search := path.Join(dataDir, dbName, fmt.Sprintf("%s_%s_*", walPrefix, dbName))
+func FindExisting(dbName string, DataDir string) (bool, *WAL, error) {
+	search := path.Join(DataDir, dbName, fmt.Sprintf("%s_%s_*", walPrefix, dbName))
 	matches, err := filepath.Glob(search)
 	if err != nil {
 		return false, nil, fmt.Errorf("error loading WAL file: %w", err)

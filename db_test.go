@@ -18,7 +18,7 @@ func TestDB_RoundTrip(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	db, err := New(dbName, DBOpts{dataDir: dir})
+	db, err := New(dbName, DBOpts{DataDir: dir})
 	//defer cleanup(dbName, dir)
 	assert.NoError(t, err)
 
@@ -35,7 +35,7 @@ func TestDB_GetFromCompactingMemtable(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	db, err := New(dbName, DBOpts{dataDir: dir})
+	db, err := New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 	assert.NoError(t, err)
 
@@ -57,7 +57,7 @@ func TestDB_GetFromSSTable(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	db, err := New(dbName, DBOpts{dataDir: dir})
+	db, err := New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -92,7 +92,7 @@ func TestNew(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	_, err = New(dbName, DBOpts{dataDir: dir})
+	_, err = New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -105,12 +105,12 @@ func TestNew_AlreadyExists(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	_, err = New(dbName, DBOpts{dataDir: dir})
+	_, err = New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
 
-	_, err = New(dbName, DBOpts{dataDir: dir})
+	_, err = New(dbName, DBOpts{DataDir: dir})
 	assert.EqualError(t, err, "database foo already exists. use DB#Open instead")
 }
 
@@ -119,7 +119,7 @@ func TestExists(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	_, err = New(dbName, DBOpts{dataDir: dir})
+	_, err = New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -135,7 +135,7 @@ func TestOpen(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	_, err = New(dbName, DBOpts{dataDir: dir})
+	_, err = New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -143,7 +143,7 @@ func TestOpen(t *testing.T) {
 	// TODO: replace this logic with DB#Close when implemented
 	closeDb(t, dbName, dir)
 
-	db, err := Open(dbName, DBOpts{dataDir: dir})
+	db, err := Open(dbName, DBOpts{DataDir: dir})
 	assert.NoError(t, err)
 
 	assert.Equal(t, dbName, db.name)
@@ -153,7 +153,7 @@ func TestOpen_NotExist(t *testing.T) {
 	dir, err := os.Getwd()
 	assert.NoError(t, err)
 
-	_, err = Open("foo", DBOpts{dataDir: dir})
+	_, err = Open("foo", DBOpts{DataDir: dir})
 	assert.EqualError(t, err, "failed opening database foo. does not exist")
 }
 
@@ -164,7 +164,7 @@ func TestOpenOrNew(t *testing.T) {
 	dbName := "foo"
 	assert.False(t, dbExists(t, dbName, dir))
 
-	_, err = OpenOrNew(dbName, DBOpts{dataDir: dir})
+	_, err = OpenOrNew(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -173,7 +173,7 @@ func TestOpenOrNew(t *testing.T) {
 	// TODO: replace this logic with DB#Close when implemented
 	closeDb(t, dbName, dir)
 
-	db, err := OpenOrNew(dbName, DBOpts{dataDir: dir})
+	db, err := OpenOrNew(dbName, DBOpts{DataDir: dir})
 	assert.NoError(t, err)
 
 	assert.Equal(t, dbName, db.name)
@@ -190,7 +190,7 @@ func TestLocking(t *testing.T) {
 	_, err = os.Stat(lockPath)
 	assert.True(t, os.IsNotExist(err))
 
-	db, err := New(dbName, DBOpts{dataDir: dir})
+	db, err := New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 	assert.NoError(t, err)
 
@@ -225,7 +225,7 @@ func TestFailIfLocked(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to open db; expect an error
-	_, err = OpenOrNew(dbName, DBOpts{dataDir: dir})
+	_, err = OpenOrNew(dbName, DBOpts{DataDir: dir})
 	assert.EqualError(t, err, fmt.Sprintf("could not lock database: cannot lock database. already "+
 		"locked by another process (%d)", os.Getpid()+1))
 }
@@ -235,7 +235,7 @@ func TestMemtableFlush(t *testing.T) {
 	assert.NoError(t, err)
 
 	dbName := "foo"
-	db, err := New(dbName, DBOpts{dataDir: dir})
+	db, err := New(dbName, DBOpts{DataDir: dir})
 	defer cleanup(dbName, dir)
 
 	assert.NoError(t, err)
@@ -263,13 +263,13 @@ func TestMemtableFlush(t *testing.T) {
 	// TODO: add tests for reading values once easier to parse a sstable
 }
 
-func cleanup(name string, datadir string) {
-	os.RemoveAll(path.Join(datadir, name))
+func cleanup(name string, DataDir string) {
+	os.RemoveAll(path.Join(DataDir, name))
 }
 
-func closeDb(t *testing.T, dbName string, datadir string) {
+func closeDb(t *testing.T, dbName string, DataDir string) {
 	// Simulate a successful close by ensuring wal is removed before re-opening
-	matches, err := filepath.Glob(path.Join(datadir, dbName, "wal_*"))
+	matches, err := filepath.Glob(path.Join(DataDir, dbName, "wal_*"))
 	assert.NoError(t, err)
 
 	for _, match := range matches {
@@ -278,8 +278,8 @@ func closeDb(t *testing.T, dbName string, datadir string) {
 	}
 }
 
-func dbExists(t *testing.T, dbName string, datadir string) bool {
-	dbPath := path.Join(datadir, dbName)
+func dbExists(t *testing.T, dbName string, DataDir string) bool {
+	dbPath := path.Join(DataDir, dbName)
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		return false
 	} else if err == nil {
