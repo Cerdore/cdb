@@ -2,14 +2,15 @@ package sstable
 
 import (
 	"bytes"
-	"cdb/bloom"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
 
-	"cdb/storage"
+	"github.com/cerdore/cdb/bloom"
+
+	"github.com/cerdore/cdb/storage"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -18,7 +19,7 @@ type Merger struct {
 	level          int
 	nextLevel      int
 	srcMetadata    []*Metadata
-	dataDir        string
+	DataDir        string
 	dbName         string
 	codec          storage.Codec
 	done           bool
@@ -31,12 +32,12 @@ const (
 
 // Merger expects to receive srcMetadata in order of most recently created to least recently created in order
 // to ensure duplicate updates are properly handled
-func NewMerger(level int, nextLevel int, srcMetadata []*Metadata, dataDir string, dbName string) *Merger {
+func NewMerger(level int, nextLevel int, srcMetadata []*Metadata, DataDir string, dbName string) *Merger {
 	return &Merger{
 		level:          level,
 		nextLevel:      nextLevel,
 		srcMetadata:    srcMetadata,
-		dataDir:        dataDir,
+		DataDir:        DataDir,
 		dbName:         dbName,
 		codec:          storage.Codec{},
 		done:           false,
@@ -53,7 +54,7 @@ func (m *Merger) Merge() ([]*Metadata, error) {
 	// open all files for reading
 	var files []io.ReadSeeker
 	for _, me := range m.srcMetadata {
-		handle, err := os.Open(path.Join(m.dataDir, m.dbName, me.Filename))
+		handle, err := os.Open(path.Join(m.DataDir, m.dbName, me.Filename))
 		//defer handle.Close()
 		if err != nil {
 			return nil, fmt.Errorf("could not open file %s for compaction: %w", me.Filename, err)
@@ -118,7 +119,7 @@ func (m *Merger) Merge() ([]*Metadata, error) {
 // material or hit a limit on output size. Return values are the metadata for the file created, a boolean indicating if
 // there's more merge work to be done, and an error value. Method should be called until boolean indicating more work is false
 func (m *Merger) mergeToFile(files []io.ReadSeeker, current []*storage.Record, stopByte []uint32) (*Metadata, bool, error) {
-	out, err := CreateFile(m.dbName, m.dataDir)
+	out, err := CreateFile(m.dbName, m.DataDir)
 	if err != nil {
 		return nil, false, fmt.Errorf("failed attempt to create new sstable file: %w", err)
 	}

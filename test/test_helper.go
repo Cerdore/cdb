@@ -6,8 +6,8 @@ import (
 	"sort"
 	"testing"
 
-	"cdb/memtable/interfaces"
-	"cdb/storage"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/storage"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )

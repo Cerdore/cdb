@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"cdb/memtable"
-	"cdb/storage"
-	"cdb/util"
+	"github.com/cerdore/cdb/memtable"
+	"github.com/cerdore/cdb/storage"
+	"github.com/cerdore/cdb/util"
 )
 
 // WAL is the structure representing the writeahead log. All updates (incl. deletes)
@@ -36,14 +36,14 @@ func New(file *os.File) *WAL {
 	return &WAL{codec: storage.Codec{}, logFile: file, size: 0, writer: bufio.NewWriter(file)}
 }
 
-func CreateFile(dbName string, dataDir string) (*os.File, error) {
+func CreateFile(dbName string, DataDir string) (*os.File, error) {
 	return util.CreateFile(fmt.Sprintf("%s_%s_%d", walPrefix, dbName, time.Now().UnixNano()/1_000_000_000),
-		dbName, dataDir)
+		dbName, DataDir)
 }
 
 // FindExisting returns true and the WAL filename if an existing WAL is fine. Otherwise, returns false
-func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
-	search := path.Join(dataDir, dbName, fmt.Sprintf("%s_%s_*", walPrefix, dbName))
+func FindExisting(dbName string, DataDir string) (bool, *WAL, error) {
+	search := path.Join(DataDir, dbName, fmt.Sprintf("%s_%s_*", walPrefix, dbName))
 	matches, err := filepath.Glob(search)
 	if err != nil {
 		return false, nil, fmt.Errorf("error loading WAL file: %w", err)
@@ -70,7 +70,32 @@ func FindExisting(dbName string, dataDir string) (bool, *WAL, error) {
 }
 
 // Write writes the record to the writeahead log
-func (wlog *WAL) Write(record *storage.Record) error {
+func (wlog *WAL) WriteSync(record *storage.Record) error {
+	data, err := wlog.codec.Encode(record)
+	if err != nil {
+		return fmt.Errorf("failed encoding data to write to log: %w", err)
+	}
+
+	if n, err := wlog.logFile.Write(data); n != len(data) {
+		return fmt.Errorf("failed to write entirety of data to log, bytes written=%d, expected=%d, err=%w",
+			n, len(data), err)
+	} else if err != nil {
+		return fmt.Errorf("failed to write data to log: %w", err)
+	}
+
+	// update current size of WAL
+	wlog.size += uint32(len(data))
+
+	// if syncW == true {
+	// 	if err := wlog.logFile.Sync(); err != nil {
+	// 		return fmt.Errorf("failed syncing data to disk: %w", err)
+	// 	}
+	// }
+
+	return nil
+}
+
+func (wlog *WAL) Write(record *storage.Record, syncW bool) error {
 	//t1 := time.Now()
 	data, err := wlog.codec.Encode(record)
 	if err != nil {
@@ -93,28 +118,27 @@ func (wlog *WAL) Write(record *storage.Record) error {
 		return fmt.Errorf("failed to write data to log: %w", err)
 	}
 
-	//el2 := time.Since(t2)
-	//	t3 := time.Now()
+	// el2 := time.Since(t2)
+	// t3 := time.Now()
 
 	// update current size of WAL
 	wlog.size += uint32(len(data))
 
-	if err := wlog.writer.Flush(); err != nil {
-		return fmt.Errorf("failed to flush into log: %w", err)
-	}
+	// el3 := time.Since(t3)
+	// fmt.Println(el2, el3)
 
-	// if err := wlog.logFile.Sync(); err != nil {
-	// 	return fmt.Errorf("failed syncing data to disk: %w", err)
-	// }
+	if syncW == true {
+		if err := wlog.writer.Flush(); err != nil {
+			return fmt.Errorf("failed to flush into log: %w", err)
+		}
+		if err := wlog.logFile.Sync(); err != nil {
+			return fmt.Errorf("failed syncing data to disk: %w", err)
+		}
+	}
 
 	return nil
 }
-func (wlog *WAL) Sync() error {
-	if err := wlog.logFile.Sync(); err != nil {
-		return fmt.Errorf("failed syncing data to disk: %w", err)
-	}
-	return nil
-}
+
 func (wlog *WAL) Size() uint32 {
 	return wlog.size
 }

@@ -3,9 +3,9 @@ package memtable
 import (
 	"time"
 
-	"cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/memtable/interfaces"
 
-	"cdb/memtable/skiplist"
+	"github.com/cerdore/cdb/memtable/skiplist"
 )
 
 type MemTable struct {

@@ -4,11 +4,11 @@ import (
 	"path"
 	"testing"
 
-	"cdb/manifest"
-	"cdb/memtable/interfaces"
-	"cdb/sstable"
-	"cdb/test"
-	"cdb/util"
+	"github.com/cerdore/cdb/manifest"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/sstable"
+	"github.com/cerdore/cdb/test"
+	"github.com/cerdore/cdb/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,25 +16,25 @@ import (
 // - level 0 not full, level 1 full, merge into existing level 2
 
 func TestCompactor_Compact_Level0NotFull(t *testing.T) {
-	dataDir, dbName := test.ConfigureDataDir(t, "foo")
-	defer test.Cleanup(t, path.Join(dataDir, dbName))
+	DataDir, dbName := test.ConfigureDataDir(t, "foo")
+	defer test.Cleanup(t, path.Join(DataDir, dbName))
 
 	md1 := writeTable(t, 0, "sst1", test.NewStaticIterator(map[string]string{
 		"aaa": "blarg",
 		"baz": "bax",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md2 := writeTable(t, 0, "sst2", test.NewStaticIterator(map[string]string{
 		"foo":   "butt",
 		"howdy": "time",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md3 := writeTable(t, 0, "sst3", test.NewStaticIterator(map[string]string{
 		"ohhh":   "brother",
 		"whoomp": "there it is",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
-	mfile, err := manifest.CreateManifestFile(dbName, dataDir)
+	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
 
@@ -42,7 +42,7 @@ func TestCompactor_Compact_Level0NotFull(t *testing.T) {
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md2, false)))
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md3, false)))
 
-	c := New(man, dataDir, dbName)
+	c := New(man, DataDir, dbName)
 
 	assert.NoError(t, c.Compact())
 
@@ -50,29 +50,29 @@ func TestCompactor_Compact_Level0NotFull(t *testing.T) {
 }
 
 func TestCompactor_Compact_Level0Full(t *testing.T) {
-	dataDir, dbName := test.ConfigureDataDir(t, "foo")
-	defer test.Cleanup(t, path.Join(dataDir, dbName))
+	DataDir, dbName := test.ConfigureDataDir(t, "foo")
+	defer test.Cleanup(t, path.Join(DataDir, dbName))
 
 	md1 := writeTable(t, 0, "sst1", test.NewStaticIterator(map[string]string{
 		"aaa": "blarg",
 		"baz": "bax",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md2 := writeTable(t, 0, "sst2", test.NewStaticIterator(map[string]string{
 		"foo":   "butt",
 		"howdy": "time",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md3 := writeTable(t, 0, "sst3", test.NewStaticIterator(map[string]string{
 		"ohhh":   "brother",
 		"whoomp": "there it is",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md4 := writeTable(t, 0, "sst4", test.NewStaticIterator(map[string]string{
 		"full": "af",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
-	mfile, err := manifest.CreateManifestFile(dbName, dataDir)
+	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
 
@@ -81,7 +81,7 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md3, false)))
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md4, false)))
 
-	c := New(man, dataDir, dbName)
+	c := New(man, DataDir, dbName)
 
 	assert.NoError(t, c.Compact())
 
@@ -98,34 +98,34 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 }
 
 func TestCompactor_Compact_Level0FullExistingLevel1WithOverlap(t *testing.T) {
-	dataDir, dbName := test.ConfigureDataDir(t, "foo")
-	defer test.Cleanup(t, path.Join(dataDir, dbName))
+	DataDir, dbName := test.ConfigureDataDir(t, "foo")
+	defer test.Cleanup(t, path.Join(DataDir, dbName))
 
 	md1 := writeTable(t, 0, "sst1", test.NewStaticIterator(map[string]string{
 		"aaa": "blarg",
 		"baz": "bax",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md2 := writeTable(t, 0, "sst2", test.NewStaticIterator(map[string]string{
 		"foo":   "butt",
 		"howdy": "time",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md3 := writeTable(t, 0, "sst3", test.NewStaticIterator(map[string]string{
 		"ohhh":   "brother",
 		"whoomp": "there it is",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md4 := writeTable(t, 0, "sst4", test.NewStaticIterator(map[string]string{
 		"full": "af",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md5 := writeTable(t, 1, "sst5", test.NewStaticIterator(map[string]string{
 		"nah": "dude",
 		"zig": "zag",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
-	mfile, err := manifest.CreateManifestFile(dbName, dataDir)
+	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
 
@@ -135,7 +135,7 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithOverlap(t *testing.T) {
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md4, false)))
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md5, false)))
 
-	c := New(man, dataDir, dbName)
+	c := New(man, DataDir, dbName)
 
 	assert.NoError(t, c.Compact())
 
@@ -152,34 +152,34 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithOverlap(t *testing.T) {
 }
 
 func TestCompactor_Compact_Level0FullExistingLevel1WithNoOverlap(t *testing.T) {
-	dataDir, dbName := test.ConfigureDataDir(t, "foo")
-	defer test.Cleanup(t, path.Join(dataDir, dbName))
+	DataDir, dbName := test.ConfigureDataDir(t, "foo")
+	defer test.Cleanup(t, path.Join(DataDir, dbName))
 
 	md1 := writeTable(t, 0, "sst1", test.NewStaticIterator(map[string]string{
 		"aaa": "blarg",
 		"baz": "bax",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md2 := writeTable(t, 0, "sst2", test.NewStaticIterator(map[string]string{
 		"foo":   "butt",
 		"howdy": "time",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md3 := writeTable(t, 0, "sst3", test.NewStaticIterator(map[string]string{
 		"ohhh":   "brother",
 		"whoomp": "there it is",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md4 := writeTable(t, 0, "sst4", test.NewStaticIterator(map[string]string{
 		"full": "af",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
 	md5 := writeTable(t, 1, "sst5", test.NewStaticIterator(map[string]string{
 		"zig":   "zag",
 		"zzzzz": "sadman",
-	}), dataDir, dbName)
+	}), DataDir, dbName)
 
-	mfile, err := manifest.CreateManifestFile(dbName, dataDir)
+	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
 
@@ -189,7 +189,7 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithNoOverlap(t *testing.T) {
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md4, false)))
 	assert.NoError(t, man.AddEntry(manifest.NewEntry(md5, false)))
 
-	c := New(man, dataDir, dbName)
+	c := New(man, DataDir, dbName)
 
 	assert.NoError(t, c.Compact())
 
@@ -213,8 +213,8 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithNoOverlap(t *testing.T) {
 	}, actuals)
 }
 
-func writeTable(t *testing.T, level int, filename string, iter interfaces.InternalIterator, dataDir string, dbName string) *sstable.Metadata {
-	file, err := util.CreateFile(filename, dbName, dataDir)
+func writeTable(t *testing.T, level int, filename string, iter interfaces.InternalIterator, DataDir string, dbName string) *sstable.Metadata {
+	file, err := util.CreateFile(filename, dbName, DataDir)
 	assert.NoError(t, err)
 	bldr := sstable.NewBuilder(filename, iter, level, file)
 

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"cdb/memtable"
+	"github.com/cerdore/cdb/memtable"
 	"github.com/stretchr/testify/assert"
 )
 

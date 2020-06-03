@@ -8,8 +8,8 @@ import (
 
 // CreateFile is a helper for WAL, SSTable, Manifest and other classes that need to create files
 // for on disk output
-func CreateFile(filename string, dbName string, dataDir string) (*os.File, error) {
-	tablePath := path.Join(dataDir, dbName, filename)
+func CreateFile(filename string, dbName string, DataDir string) (*os.File, error) {
+	tablePath := path.Join(DataDir, dbName, filename)
 	if _, err := os.Stat(tablePath); !os.IsNotExist(err) { //存在
 		if err != nil {
 			return nil, fmt.Errorf("failure checking for %s existence: %w", tablePath, err)

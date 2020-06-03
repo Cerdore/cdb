@@ -3,8 +3,8 @@ package skiplist
 import (
 	"testing"
 
-	"cdb/memtable/interfaces"
-	"cdb/storage"
+	"github.com/cerdore/cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/storage"
 	"github.com/stretchr/testify/assert"
 )
 

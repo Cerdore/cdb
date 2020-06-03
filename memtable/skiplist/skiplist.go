@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"strings"
 
-	"cdb/memtable/interfaces"
+	"github.com/cerdore/cdb/memtable/interfaces"
 
 	log "github.com/sirupsen/logrus"
 )
