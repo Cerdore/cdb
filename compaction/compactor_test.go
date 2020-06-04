@@ -72,6 +72,11 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 		"full": "af",
 	}), DataDir, dbName)
 
+	// md1.Bits = byte[](nil
+	// md2.Bits = uint8[](nil)
+	// md1.Bits = uint8[](nil)
+	// md1.Bits = uint8[](nil)
+
 	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
@@ -89,6 +94,7 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 	assert.Equal(t, 1, len(man.MetadataForLevel(1)))
 
 	actual := man.MetadataForLevel(1)[0]
+	actual.Bits = nil
 	assert.Equal(t, &sstable.Metadata{
 		Level:    1,
 		Filename: actual.Filename,
@@ -143,6 +149,7 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithOverlap(t *testing.T) {
 	assert.Equal(t, 1, len(man.MetadataForLevel(1)))
 
 	actual := man.MetadataForLevel(1)[0]
+	actual.Bits = nil
 	assert.Equal(t, &sstable.Metadata{
 		Level:    1,
 		Filename: actual.Filename,
@@ -197,6 +204,8 @@ func TestCompactor_Compact_Level0FullExistingLevel1WithNoOverlap(t *testing.T) {
 	assert.Equal(t, 2, len(man.MetadataForLevel(1)))
 
 	actuals := man.MetadataForLevel(1)
+	actuals[0].Bits = nil
+	actuals[1].Bits = nil
 	assert.Equal(t, []*sstable.Metadata{
 		{
 			Level:    1,
@@ -218,7 +227,7 @@ func writeTable(t *testing.T, level int, filename string, iter interfaces.Intern
 	assert.NoError(t, err)
 	bldr := sstable.NewBuilder(filename, iter, level, file)
 
-	meta, err := bldr.WriteTable()
+	meta, err := bldr.WriteTable(2)
 	assert.NoError(t, err)
 
 	return meta

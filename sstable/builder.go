@@ -78,7 +78,6 @@ func (s *Builder) WriteTable(memNum uint32) (*Metadata, error) {
 	var lastKey []byte
 
 	// Write actual key-values to disk
-	fmt.Println("begin builder rec loop")
 	for ; s.iter.HasNext(); recWritten++ {
 		//fmt.Println(recWritten)
 		rec := s.iter.Next()
@@ -94,13 +93,11 @@ func (s *Builder) WriteTable(memNum uint32) (*Metadata, error) {
 
 		bytes, err := s.codec.Encode(rec)
 		if err != nil {
-			fmt.Println("error1 ")
 			return nil, fmt.Errorf("could not encode record: %w", err)
 		}
 
 		//if err = write(s.writer, bytes); err != nil {
 		if n, err := s.writer.Write(bytes); err != nil || n != len(bytes) {
-			fmt.Println("error2 ")
 			return nil, fmt.Errorf("failed attempting to write to level 0 sstable: %w", err)
 		}
 
@@ -113,7 +110,6 @@ func (s *Builder) WriteTable(memNum uint32) (*Metadata, error) {
 		lastKey = rec.Key
 		bytesWritten += uint32(len(bytes))
 	}
-	fmt.Println(recWritten, "end loop")
 
 	// bloom Here
 	// bloomStart := bytesWritten

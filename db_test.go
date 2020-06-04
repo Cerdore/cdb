@@ -19,7 +19,7 @@ func TestDB_RoundTrip(t *testing.T) {
 
 	dbName := "foo"
 	db, err := New(dbName, DBOpts{DataDir: dir})
-	//defer cleanup(dbName, dir)
+	defer cleanup(dbName, dir)
 	assert.NoError(t, err)
 
 	err = db.Put([]byte("foo"), []byte("bar"), false)

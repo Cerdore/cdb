@@ -48,7 +48,7 @@ type DB struct {
 // TODO: allow configuration via options provided to constructor
 const (
 	// Makes sense on Linux, may not elsewhere
-	DataDir  = "/home/cerdore/kdb"
+	DataDir  = "/home/cerdore/cdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
 	//MtSizeLimit = uint32(4194304)
@@ -374,7 +374,7 @@ func (d *DB) compactionWatcher() {
 func (d *DB) flushMemTable(tableName string, writer *os.File, memNum uint32) error {
 	iter := d.compactingMemTable.InternalIterator()
 
-	fmt.Println(d.compactingMemTable.Num())
+	//fmt.Println(d.compactingMemTable.Num())
 
 	builder := sstable.NewBuilder(tableName, iter, 0, writer)
 	metadata, err := builder.WriteTable(memNum)
