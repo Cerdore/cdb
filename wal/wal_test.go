@@ -27,7 +27,7 @@ func TestNew(t *testing.T) {
 
 	wf, err := CreateFile(dbName, dir)
 	assert.NoError(t, err)
-	w := New(wf)
+	wlog := New(wf)
 	assert.True(t, test.FileExists(t, wlog.logFile.Name()))
 }
 
@@ -43,7 +43,7 @@ func TestWAL_Write(t *testing.T) {
 
 	wf, err := CreateFile(dbName, dir)
 	assert.NoError(t, err)
-	w := New(wf)
+	wlog := New(wf)
 
 	records := []*storage.Record{
 		storage.NewRecord([]byte("foo"), []byte("bar"), false),
@@ -52,7 +52,7 @@ func TestWAL_Write(t *testing.T) {
 		storage.NewRecord([]byte("oooooh"), []byte("wweeee"), false),
 	}
 	for _, record := range records {
-		assert.NoError(t, wlog.Write(record))
+		assert.NoError(t, wlog.Write(record, false))
 	}
 
 	data, err := ioutil.ReadFile(wlog.logFile.Name())
@@ -87,13 +87,13 @@ func TestWAL_Size(t *testing.T) {
 
 	wf, err := CreateFile(dbName, dir)
 	assert.NoError(t, err)
-	w := New(wf)
+	wlog := New(wf)
 
 	sz := uint32(0)
-	sz += writeRecord(t, w, storage.NewRecord([]byte("foo"), []byte("bar"), false))
+	sz += writeRecord(t, wlog, storage.NewRecord([]byte("foo"), []byte("bar"), false))
 	assert.Equal(t, sz, wlog.Size())
 
-	sz += writeRecord(t, w, storage.NewRecord([]byte("foo2"), []byte("bar2"), false))
+	sz += writeRecord(t, wlog, storage.NewRecord([]byte("foo2"), []byte("bar2"), false))
 	assert.Equal(t, sz, wlog.Size())
 }
 
@@ -109,7 +109,7 @@ func TestWAL_Restore(t *testing.T) {
 
 	wf, err := CreateFile(dbName, dir)
 	assert.NoError(t, err)
-	w := New(wf)
+	wlog := New(wf)
 
 	records := []*storage.Record{
 		storage.NewRecord([]byte("foo"), []byte("bar"), false),
@@ -118,7 +118,7 @@ func TestWAL_Restore(t *testing.T) {
 		storage.NewRecord([]byte("oooooh"), []byte("wweeee"), false),
 	}
 	for _, record := range records {
-		assert.NoError(t, wlog.Write(record))
+		assert.NoError(t, wlog.Write(record, false))
 	}
 
 	found, loadedWal, err := FindExisting(dbName, dir)
@@ -154,7 +154,7 @@ func TestWAL_Close(t *testing.T) {
 
 	wf, err := CreateFile(dbName, dir)
 	assert.NoError(t, err)
-	w := New(wf)
+	wlog := New(wf)
 	assert.True(t, test.FileExists(t, wlog.logFile.Name()))
 
 	err = wlog.Close()
@@ -162,11 +162,11 @@ func TestWAL_Close(t *testing.T) {
 	assert.False(t, test.FileExists(t, wlog.logFile.Name()))
 }
 
-func writeRecord(t *testing.T, w *WAL, rec *storage.Record) uint32 {
+func writeRecord(t *testing.T, wlog *WAL, rec *storage.Record) uint32 {
 	data, err := wlog.codec.Encode(rec)
 	assert.NoError(t, err)
 
-	assert.NoError(t, wlog.Write(rec))
+	assert.NoError(t, wlog.Write(rec, false))
 
 	return uint32(len(data))
 }

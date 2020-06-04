@@ -100,6 +100,7 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 		Filename: actual.Filename,
 		StartKey: []byte("aaa"),
 		EndKey:   []byte("whoomp"),
+		Bits:     nil,
 	}, actual)
 }
 

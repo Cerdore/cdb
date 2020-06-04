@@ -19,7 +19,7 @@ func TestSSTableBuilder_WriteLevel0Table(t *testing.T) {
 
 	builder := newBuilder("test", mem.InternalIterator(), 0, &buf, 1)
 
-	meta, err := builder.WriteTable()
+	meta, err := builder.WriteTable(2)
 	assert.NoError(t, err)
 	assert.Equal(t, &Metadata{Level: 0, Filename: "test", StartKey: []byte("baz"), EndKey: []byte("foo")}, meta)
 

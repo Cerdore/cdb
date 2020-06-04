@@ -77,7 +77,7 @@ func writeMemTable(t *testing.T, filename string, dbName string, DataDir string,
 	assert.NoError(t, err)
 
 	builder := NewBuilder(filepath.Base(sst01.Name()), mem.InternalIterator(), 0, sst01)
-	md01, err := builder.WriteTable()
+	md01, err := builder.WriteTable(2)
 	assert.NoError(t, err)
 
 	return md01
