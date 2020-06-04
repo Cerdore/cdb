@@ -19,7 +19,7 @@ func TestSearch(t *testing.T) {
 	buf := bytes.Buffer{}
 	builder := newBuilder("test", mem.InternalIterator(), 0, &buf, 1)
 
-	meta, err := builder.WriteTable()
+	meta, err := builder.WriteTable(3)
 	assert.NoError(t, err)
 	assert.Equal(t, &Metadata{Level: 0, Filename: "test", StartKey: []byte("foo"), EndKey: []byte("sick")}, meta)
 

@@ -72,6 +72,10 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 		"full": "af",
 	}), DataDir, dbName)
 
+	md1.Bits = nil
+	md2.Bits = nil
+	md3.Bits = nil
+	md4.Bits = nil
 	mfile, err := manifest.CreateManifestFile(dbName, DataDir)
 	assert.NoError(t, err)
 	man := manifest.NewManifest(mfile)
@@ -94,6 +98,7 @@ func TestCompactor_Compact_Level0Full(t *testing.T) {
 		Filename: actual.Filename,
 		StartKey: []byte("aaa"),
 		EndKey:   []byte("whoomp"),
+		Bits:     nil,
 	}, actual)
 }
 
@@ -218,7 +223,7 @@ func writeTable(t *testing.T, level int, filename string, iter interfaces.Intern
 	assert.NoError(t, err)
 	bldr := sstable.NewBuilder(filename, iter, level, file)
 
-	meta, err := bldr.WriteTable()
+	meta, err := bldr.WriteTable(2)
 	assert.NoError(t, err)
 
 	return meta
