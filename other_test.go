@@ -66,7 +66,7 @@ func TestLargePut(t *testing.T) {
 	}
 
 	db1.Close()
-	//os.RemoveAll(path.Join(DataDir, "chen3"))
+	defer os.RemoveAll(path.Join(DataDir, "chen2"))
 }
 
 func TestTimeof(t *testing.T) {
@@ -80,9 +80,20 @@ func TestTimeof(t *testing.T) {
 	}
 
 	d.Close()
+	defer os.RemoveAll(path.Join(DataDir, "chen3"))
 }
 
 func TestRestore(t *testing.T) {
+	d, err := New("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < 1000000; i++ {
+		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
+	}
+
+	d.Close()
+
 	db1, err := Open("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
@@ -100,9 +111,21 @@ func TestRestore(t *testing.T) {
 	}
 	db1.Close()
 	assert.Equal(t, sum, 1000000-999900)
+
+	defer os.RemoveAll(path.Join(DataDir, "chen3"))
 }
 
 func TestPutAGet(t *testing.T) {
+	d, err := New("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < 1000000; i++ {
+		d.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
+	}
+
+	d.Close()
+
 	db, err := Open("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
@@ -126,9 +149,20 @@ func TestPutAGet(t *testing.T) {
 	db.Close()
 
 	assert.Equal(t, "myvalue990000", string(ans))
+
+	defer os.RemoveAll(path.Join(DataDir, "chen3"))
 }
 
 func TestOpenAndDel(t *testing.T) {
+
+	d, err := New("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	d.Put([]byte("kk1"), []byte("kv23"), false)
+
+	d.Close()
+
 	db, err := Open("chen3", DBOpts{DataDir: "", MtSizeLimit: 0})
 	if err != nil {
 		t.Log(err)
@@ -141,6 +175,8 @@ func TestOpenAndDel(t *testing.T) {
 	}
 	assert.Equal(t, []byte(nil), ans)
 	db.Close()
+
+	defer os.RemoveAll(path.Join(DataDir, "chen3"))
 }
 
 // func TestDataExists2(t *testing.T) {

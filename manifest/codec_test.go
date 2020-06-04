@@ -25,6 +25,7 @@ func TestCodec_RoundTrip(t *testing.T) {
 	assert.Equal(t, totalLen, uint32(len(eBytes)-4))
 
 	actual, err := codec.DecodeEntry(eBytes[4:])
+	actual.metadata.Bits = nil
 	assert.NoError(t, err)
 
 	assert.Equal(t, entry, actual)

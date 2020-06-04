@@ -23,6 +23,7 @@ func TestManifest_AddEntry(t *testing.T) {
 			Filename: "foo",
 			StartKey: []byte("foo"),
 			EndKey:   []byte("bar"),
+			Bits:     nil,
 		},
 		deleted: false,
 	}
@@ -32,6 +33,7 @@ func TestManifest_AddEntry(t *testing.T) {
 			Filename: "bar",
 			StartKey: []byte("baz"),
 			EndKey:   []byte("bax"),
+			Bits:     nil,
 		},
 		deleted: false,
 	}
@@ -41,6 +43,7 @@ func TestManifest_AddEntry(t *testing.T) {
 			Filename: "bar",
 			StartKey: []byte("baz"),
 			EndKey:   []byte("bax"),
+			Bits:     nil,
 		},
 		deleted: true,
 	}
@@ -48,6 +51,7 @@ func TestManifest_AddEntry(t *testing.T) {
 
 	eLen := binary.BigEndian.Uint32(buf.Bytes()[0:uint32size])
 	actual, err := man.codec.DecodeEntry(buf.Bytes()[4 : 4+eLen])
+	actual.metadata.Bits = nil
 	assert.NoError(t, err)
 	assert.Equal(t, entry1, actual)
 
@@ -56,6 +60,7 @@ func TestManifest_AddEntry(t *testing.T) {
 	e1End := 4 + eLen
 	eLen = binary.BigEndian.Uint32(buf.Bytes()[e1End : e1End+uint32size])
 	actual, err = man.codec.DecodeEntry(buf.Bytes()[e1End+uint32size : e1End+uint32size+eLen])
+	actual.metadata.Bits = nil
 	assert.NoError(t, err)
 	assert.Equal(t, entry2, actual)
 
@@ -99,13 +104,14 @@ func TestLoadLatest(t *testing.T) {
 	man := NewManifest(m)
 
 	// Add some entries
-	assert.NoError(t, man.AddEntry(&Entry{metadata: &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte("")}, deleted: false}))
-	assert.NoError(t, man.AddEntry(&Entry{metadata: &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte("")}, deleted: true}))
+	assert.NoError(t, man.AddEntry(&Entry{metadata: &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte(""), Bits: nil}, deleted: false}))
+	assert.NoError(t, man.AddEntry(&Entry{metadata: &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte(""), Bits: nil}, deleted: true}))
 
 	// Open as new manifest
 	_, man2, err := LoadLatest(dbName, dir)
 	assert.NoError(t, err)
-
+	man2.entries[0].metadata.Bits = nil
+	man2.entries[1].metadata.Bits = nil
 	assert.Equal(t, man.entries, man2.entries)
 	assert.Equal(t, 0, len(man.MetadataForLevel(0)))
 }
@@ -127,9 +133,9 @@ func TestManifest_MetadataForLevel(t *testing.T) {
 	man := NewManifest(m)
 
 	// Add some entries
-	md0_1 := &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte("")}
-	md0_2 := &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte("")}
-	md1_1 := &sstable.Metadata{Level: 1, Filename: "", StartKey: []byte(""), EndKey: []byte("")}
+	md0_1 := &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte(""), Bits: nil}
+	md0_2 := &sstable.Metadata{Level: 0, Filename: "", StartKey: []byte(""), EndKey: []byte(""), Bits: nil}
+	md1_1 := &sstable.Metadata{Level: 1, Filename: "", StartKey: []byte(""), EndKey: []byte(""), Bits: nil}
 	assert.NoError(t, man.AddEntry(&Entry{metadata: md0_1, deleted: false}))
 	assert.NoError(t, man.AddEntry(&Entry{metadata: md0_2, deleted: false}))
 	assert.NoError(t, man.AddEntry(&Entry{metadata: md1_1, deleted: false}))

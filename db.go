@@ -234,11 +234,12 @@ func (d *DB) Close() error {
 	// ensure no future get/puts succeed
 
 	//err = d.flushMemTable(filepath.Base(file.Name()), file)
-	log.Info("begin to close this db")
+
+	//	log.Info("begin to close this db")
 
 	close(d.stopWatching)
 	d.wg.Wait()
-	log.Info("Already closed this db")
+	log.Info("Already closed db: ", d.name)
 	return d.unlock()
 }
 
