@@ -71,8 +71,7 @@ func (o *DBOpts) applyDefaults() {
 	}
 }
 
-// New creates a new database based on the name provided.
-// New fails if the database already exists
+// New creates a new database if it's not exists
 func New(name string, opts DBOpts) (*DB, error) {
 	opts.applyDefaults()
 
@@ -100,7 +99,7 @@ func lock(name string, DataDir string) error {
 	lockPath := path.Join(DataDir, name, lockFile)
 
 	lock, err := os.Open(lockPath)
-	// Database is not currently locked, attempt to acquire
+	// not locked
 	if os.IsNotExist(err) {
 		if lockFile, err := os.OpenFile(lockPath, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666); os.IsExist(err) {
 			return fmt.Errorf("cannot lock database. already locked by another process")
@@ -119,7 +118,7 @@ func lock(name string, DataDir string) error {
 	} else if err != nil {
 		return fmt.Errorf("failure attempting to lock database: %w", err)
 	} else {
-		// Database currently locked, see if it's me
+		// locked
 		scanner := bufio.NewScanner(lock)
 		scanner.Scan()
 		lockPid, err := strconv.Atoi(scanner.Text())
@@ -135,11 +134,10 @@ func lock(name string, DataDir string) error {
 	}
 }
 
-// Open opens a database of the name provided. Open fails
-// if the database does not exist
+// Open opens a database
 func Open(name string, opts DBOpts) (*DB, error) {
 	opts.applyDefaults()
-
+	log.Info("open database: ", name)
 	if exists, err := exists(name, opts.DataDir); !exists {
 		if err == nil {
 			return nil, fmt.Errorf("failed opening database %s. does not exist", name)
@@ -154,7 +152,7 @@ func Open(name string, opts DBOpts) (*DB, error) {
 
 	mem := memtable.New()
 
-	// Attempt to load WAL if exists. Otherwise create a new one
+	// load WAL if exists
 	found, walog, err := wal.FindExisting(name, opts.DataDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed attempting to look for existing WAL file: %w", err)
@@ -196,7 +194,6 @@ func Open(name string, opts DBOpts) (*DB, error) {
 	}
 	db.wg.Add(1)
 	go db.compactionWatcher()
-	//go db.doCompaction()
 	return db, nil
 }
 
@@ -231,12 +228,6 @@ func OpenOrNew(name string, opts DBOpts) (*DB, error) {
 func (d *DB) Close() error {
 	// TODO:
 	// flush to memtable here
-	// ensure no future get/puts succeed
-
-	//err = d.flushMemTable(filepath.Base(file.Name()), file)
-
-	//	log.Info("begin to close this db")
-
 	close(d.stopWatching)
 	d.wg.Wait()
 	log.Info("Already closed db: ", d.name)
