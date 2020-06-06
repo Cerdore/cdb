@@ -179,18 +179,18 @@ func TestOpenAndDel(t *testing.T) {
 	defer os.RemoveAll(path.Join(DataDir, "chen3"))
 }
 
-// func TestDataExists2(t *testing.T) {
-// 	db, err := New("chen4", DBOpts{DataDir: "", MtSizeLimit: 0})
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	for i := 1; i < 200000; i++ {
-// 		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
-// 	}
+func TestDataExists2(t *testing.T) {
+	db, err := New("chen4", DBOpts{DataDir: "", MtSizeLimit: 0})
+	if err != nil {
+		panic(err)
+	}
+	for i := 1; i < 1000000; i++ {
+		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
+	}
 
-// 	db.Close()
+	db.Close()
 
-// }
+}
 
 // func TestDataLaExists(t *testing.T) {
 // 	db, err := New("chen50", DBOpts{DataDir: "", MtSizeLimit: 0})

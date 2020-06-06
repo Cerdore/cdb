@@ -47,12 +47,12 @@ type DB struct {
 
 // TODO: allow configuration via options provided to constructor
 const (
-	// Makes sense on Linux, may not elsewhere
+	// Linux
 	DataDir  = "/home/cerdore/cdb"
 	lockFile = "__DB_LOCK__"
 	// Limit memtable to 4 MBs before flushing
 	//MtSizeLimit = uint32(4194304)
-	MtSizeLimit = uint32(2 * 1024 * 1024)
+	MtSizeLimit = uint32(4 * 1024 * 1024)
 	//MtSizeLimit = uint32(4096)
 )
 
