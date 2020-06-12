@@ -188,6 +188,33 @@ func TestDataExists2(t *testing.T) {
 		db.Put([]byte(fmt.Sprintf("mykey%7d", i)), []byte(fmt.Sprint("myvalue", i)), false)
 	}
 
+	key := "mykey     22"
+
+	ans, err := db.Get([]byte(key))
+	if err != nil {
+		panic(err)
+	}
+	if ans != nil {
+		fmt.Println(string(ans))
+	} else {
+		fmt.Println("There's no key: ", ans)
+	}
+
+	errd := db.Delete([]byte(key), false)
+	if errd != nil {
+		panic(errd)
+	}
+
+	ans2, err2 := db.Get([]byte(key))
+	if err2 != nil {
+		panic(err2)
+	}
+	if ans2 != nil {
+		fmt.Println(string(ans2))
+	} else {
+		fmt.Println("There's no key: ", key)
+	}
+
 	db.Close()
 
 }

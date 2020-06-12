@@ -245,9 +245,15 @@ func (d *DB) Get(key []byte) ([]byte, error) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
-	val := d.memTable.Get(key)
+	del, val := d.memTable.Get(key)
+	if del {
+		return val, nil
+	}
 	if val == nil && d.compactingMemTable != nil {
-		val = d.compactingMemTable.Get(key)
+		del, val = d.compactingMemTable.Get(key)
+		if del && val == nil {
+			return val, nil
+		}
 	}
 
 	// TODO: add a bloom filter to reduce need to potentially check every level

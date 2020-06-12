@@ -61,7 +61,7 @@ func (s *SkipList) get(key []byte) (bool, []byte) {
 			switch bytes.Compare(c.next[i].key, key) {
 			case 0:
 				if c.next[i].deleted {
-					return false, nil
+					return true, nil
 				} else {
 					return true, c.next[i].value
 				}
@@ -108,7 +108,11 @@ func (s *SkipList) Delete(key []byte) bool {
 			}
 		}
 	}
-
+	if !removed {
+		s.insertD(key, nil)
+		s.size += uint32(len(key))
+		s.num++
+	}
 	return removed
 }
 
@@ -161,6 +165,33 @@ func (s *SkipList) insert(key []byte, value []byte) {
 	}
 }
 
+func (s *SkipList) insertD(key []byte, value []byte) {
+	levels := s.generateLevels()
+
+	if levels > s.levels {
+		s.levels = levels
+	}
+
+	newNode := &Node{next: make([]*Node, levels), key: key, value: value, deleted: true}
+
+	c := s.head
+	for i := s.levels - 1; i >= 0; i-- {
+		for ; c.next[i] != nil; c = c.next[i] {
+			// Stop moving rightward at this level if next key is greater
+			// than key we plan to insert
+			if bytes.Compare(c.next[i].key, key) > 0 {
+				break
+			} else if bytes.Equal(c.next[i].key, key) {
+				log.Panicf("attempting to insert key %v (%s) that already exists. "+
+					"this should not happen!", key, string(key))
+			}
+		}
+		if levels > i {
+			newNode.next[i] = c.next[i]
+			c.next[i] = newNode
+		}
+	}
+}
 func (s *SkipList) isDeleted(key []byte) bool {
 	c := s.head
 	for i := s.levels - 1; i >= 0; i-- {

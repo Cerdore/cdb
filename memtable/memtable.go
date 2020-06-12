@@ -16,11 +16,14 @@ func New() *MemTable {
 	return &MemTable{memStore: skiplist.New(time.Now().UnixNano())}
 }
 
-func (m *MemTable) Get(key []byte) []byte {
+func (m *MemTable) Get(key []byte) (bool, []byte) {
 	if found, val := m.memStore.Get(key); found {
-		return val
+		if val == nil {
+			return true, nil
+		}
+		return false, val
 	} else {
-		return nil
+		return false, nil
 	}
 }
 
